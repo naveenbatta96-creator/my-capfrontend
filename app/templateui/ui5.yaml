@@ -1,0 +1,17 @@
+specVersion: "3.2"
+metadata:
+  name: "my-capfrontend"
+type: application
+
+server:
+  customMiddleware:
+    - name: fiori-tools-proxy
+      afterMiddleware: compression
+      configuration:
+        backend:
+          - path: /odata/v4/template
+            url: http://localhost:4004
+            destination: my-backend-destination
+
+    - name: ui5-middleware-livereload
+      afterMiddleware: compression

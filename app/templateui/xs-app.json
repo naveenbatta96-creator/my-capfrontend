@@ -1,0 +1,17 @@
+{
+  "authenticationMethod": "none",
+  "routes": [
+    {
+      "source": "^/odata/v4/template/(.*)$",
+      "target": "/odata/v4/template/$1",
+      "destination": "my-backend-destination",
+      "authenticationType": "xsuaa"
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+_schema-version: "3.1"
+ID: my-frontend
+version: 1.0.0
+
+modules:
+  - name: my-frontend-app
+    type: html5
+    path: .
+    build-parameters:
+      builder: custom
+      commands:
+        - npm run build
+      supported-platforms: []
+
+  - name: my-frontend-deployer
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: my-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: dist
+      requires:
+        - name: my-frontend-app
+          artifacts:
+            - dist.zip
+          target-path: .
+
+resources:
+  - name: my-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
