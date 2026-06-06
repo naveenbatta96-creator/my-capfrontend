@@ -2,8 +2,8 @@
     controllerName="com.template.builder.controller.Home"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:f="sap.f"
-    xmlns="sap.m"
->
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
     <Page showHeader="true">
         <customHeader>
             <f:ShellBar
@@ -12,8 +12,7 @@
                 showSearch="false"
                 showNotifications="false"
                 showProductSwitcher="false"
-                homeIcon="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg"
-            />
+                homeIcon="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" />
         </customHeader>
         <content>
             <VBox class="sapUiMediumMargin">
@@ -21,9 +20,9 @@
                     id="templateTable"
                     class="sapUiMediumMarginTop"
                     items="{
-                     path: '/templateMasterWithCount'
-                    }"
-                >
+                        path: '/templateMasterWithCount',
+                        sorter: { path: 'isStandard', descending: true }
+                    }">
                     <headerToolbar>
                         <OverflowToolbar>
                             <ToolbarSpacer />
@@ -31,66 +30,87 @@
                                 text="Create Template"
                                 type="Emphasized"
                                 icon="sap-icon://add"
-                                press=".onCreateTemplate"
-                            />
+                                press=".onCreateTemplate" />
                         </OverflowToolbar>
                     </headerToolbar>
                     <columns>
-                        <Column>
-                            <Text text="Template Id" />
-                        </Column>
-                        <Column>
-                            <Text text="Template Name" />
-                        </Column>
-                        <Column>
-                            <Text text="Template Type" />
-                        </Column>
-                        <Column>
-                            <Text text="Sheet Mode" />
-                        </Column>
-                        <Column>
-                            <Text text="Total Fields" />
-                        </Column>
-                        <Column >
-                        <Text  text="Created" />
-                        </Column>
-                        <Column>
-                            <Text text="Actions" />
-                        </Column>
+                        <Column><Text text="Template Id" /></Column>
+                        <Column><Text text="Template Name" /></Column>
+                        <Column><Text text="Template Type" /></Column>
+                        <Column><Text text="Sheet Mode" /></Column>
+                        <Column><Text text="Total Fields" /></Column>
+                        <Column><Text text="Created" /></Column>
+                        <Column><Text text="Actions" /></Column>
                     </columns>
 
                     <items>
                         <ColumnListItem
                             type="Navigation"
                             press=".onRowPress"
-                        >
+                            highlight="{= ${isStandard} ? 'Warning' : 'None'}">
                             <cells>
+                                <!-- TEMPLATE ID -->
                                 <Text text="{
-                                    parts: [
-                                        {path: 'ID'},
-                                        {path: 'templateType'}
-                                    ],
+                                    parts: [{path: 'ID'}, {path: 'templateType'}],
                                     formatter: '.formatTemplateID'
                                 }" />
-                                <Text text="{templateName}" />
-                                <Text text="{templateType}" />
-                                <Text text="{sheetMode}" />
 
+                                <!-- TEMPLATE NAME + STANDARD BADGE -->
+                                <HBox alignItems="Center" wrap="Wrap">
+                                    <Text text="{templateName}" class="sapUiTinyMarginEnd" />
+                                    <ObjectStatus
+                                        text="STANDARD"
+                                        state="Warning"
+                                        icon="sap-icon://flag"
+                                        visible="{isStandard}"
+                                        class="sapUiTinyMarginBegin" />
+                                </HBox>
+
+                                <!-- TEMPLATE TYPE -->
+                                <Text text="{templateType}" />
+
+                                <!-- SHEET MODE -->
+                                <ObjectStatus
+                                    text="{= ${sheetMode} === 'SINGLE' ? 'Single sheet' : 'Multiple sheets'}"
+                                    state="{= ${sheetMode} === 'SINGLE' ? 'Information' : 'Success'}" />
+
+                                <!-- TOTAL FIELDS -->
                                 <Text text="{mappingsCount}" />
-                                <Text text="{path: 'createdAt', formatter: '.formatDate'}" />
-                                <HBox>
+
+                                <!-- CREATED — "Built-in" for standard -->
+                              <Text text="{
+    parts: [
+        {path: 'createdAt'},
+        {path: 'isStandard'}
+    ],
+    formatter: '.formatCreatedDate'
+}" />
+                                <!-- ACTIONS -->
+                                <HBox alignItems="Center">
+                                    <!-- View button — standard template only -->
+                                    <Button
+                                        text="View"
+                                        icon="sap-icon://eye"
+                                        type="Transparent"
+                                        press=".onRowPress"
+                                        visible="{isStandard}"
+                                        class="sapUiTinyMarginEnd" />
+
+                                    <!-- Download — hidden for standard -->
                                     <Button
                                         icon="sap-icon://download"
                                         type="Accept"
                                         tooltip="Download to Excel"
                                         press=".onDownloadExcel"
-                                        class="sapUiTinyMarginEnd"
-                                    />
+                                        visible="{= !${isStandard} }"
+                                        class="sapUiTinyMarginEnd" />
+
+                                    <!-- Delete — hidden for standard -->
                                     <Button
                                         text="Delete"
                                         type="Reject"
                                         press=".onDeleteTemplate"
-                                    />
+                                        visible="{= !${isStandard} }" />
                                 </HBox>
                             </cells>
                         </ColumnListItem>

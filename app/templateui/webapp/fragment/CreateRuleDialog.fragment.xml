@@ -1,0 +1,63 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+>
+    <Dialog
+        id="createRuleDialog"
+        title="Create New Mapping Rule"
+        type="Standard"
+        contentWidth="500px"
+    >
+        <content>
+            <f:SimpleForm
+                editable="true"
+                layout="ResponsiveGridLayout"
+                class="sapUiMediumMargin"
+            >
+                <f:content>
+                    <Label text="Rule ID" required="true" />
+                    <Input
+                        id="ruleIdInput"
+                        placeholder="e.g. RULE_FETCH_ACCT_DOC"
+                        width="80%"
+                        maxLength="50"
+                    />
+
+                    <Label text="Rule Name" required="true" />
+                    <Input
+                        id="ruleNameInput"
+                        placeholder="e.g. Fetch Account Document"
+                        width="80%"
+                        maxLength="100"
+                    />
+
+                    <Label text="Description" />
+                    <TextArea
+                        id="ruleDescInput"
+                        placeholder="Optional description of the rule"
+                        width="80%"
+                        rows="3"
+                        maxLength="500"
+                    />
+                </f:content>
+            </f:SimpleForm>
+        </content>
+
+        <beginButton>
+            <Button
+                text="Cancel"
+                type="Transparent"
+                press=".onCloseCreateRuleDialog"
+            />
+        </beginButton>
+
+        <endButton>
+            <Button
+                text="Create Rule"
+                type="Emphasized"
+                press=".onConfirmCreateRule"
+            />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

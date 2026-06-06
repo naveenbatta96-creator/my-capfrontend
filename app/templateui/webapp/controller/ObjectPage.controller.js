@@ -9,11 +9,15 @@ sap.ui.define([
 
     return Controller.extend("com.template.builder.controller.ObjectPage", {
 
+        // ==========================================
+        // FORMATTERS
+        // ==========================================
+
         formatLevelState: function (sLevelName) {
             var oLevelColors = {
-                "HEADER": "Information",    // Blue
-                "PAYMENT": "Success",       // Green
-                "CLEARING": "Warning"       // Orange
+                "HEADER": "Information",
+                "PAYMENT": "Success",
+                "CLEARING": "Warning"
             };
             return oLevelColors[sLevelName] || "None";
         },
@@ -33,43 +37,42 @@ sap.ui.define([
             var sSuffix = "TEMPLATE";
             if (sTemplateType) {
                 var sTypeUpper = sTemplateType.toUpperCase();
-                if (sTypeUpper === "LOCKBOX") {
-                    sSuffix = "LBX";
-                } else if (sTypeUpper.includes("PAYMENT")) {
-                    sSuffix = "PAY";
-                } else if (sTypeUpper.includes("CLEARING")) {
-                    sSuffix = "CLR";
-                }
+                if (sTypeUpper === "LOCKBOX") sSuffix = "LBX";
+                else if (sTypeUpper.includes("PAYMENT")) sSuffix = "PAY";
+                else if (sTypeUpper.includes("CLEARING")) sSuffix = "CLR";
             }
             return sSuffix + "-" + sTemplateType + "-V1-" + sHexPart;
         },
 
+        // ==========================================
+        // LIFECYCLE
+        // ==========================================
+
         onInit: function () {
-            // 1. Get the router
             var oRouter = this.getOwnerComponent().getRouter();
-            
-            // 2. Attach a function to run every time this route is hit
             oRouter.getRoute("RouteObjectPage").attachPatternMatched(this._onObjectMatched, this);
 
-            // 3. Initialize metadata model for progress tracking
-            var oMetaModel = new sap.ui.model.json.JSONModel({
+            // Metadata model for progress tracking
+            this.getView().setModel(new sap.ui.model.json.JSONModel({
                 mappingsCount: 0,
-                totalCount: 48,
+                totalCount: 0,
                 percentValue: 0,
                 unmappedFilterPressed: false
-            });
-            this.getView().setModel(oMetaModel, "metaModel");
+            }), "metaModel");
+
+            // ✅ Rules model — JSONModel for Mapping Rules table
+            this.getView().setModel(new sap.ui.model.json.JSONModel({
+                rules: []
+            }), "rulesModel");
         },
 
         _onObjectMatched: function (oEvent) {
             var sTemplateId = oEvent.getParameter("arguments").templateId;
-            var sPath = "/TemplateMaster(" + sTemplateId + ")"; 
+            var sPath = "/TemplateMaster(" + sTemplateId + ")";
 
             this.getView().bindElement({
                 path: sPath,
-                parameters: {
-                    $expand: "mappings($expand=field)" 
-                }
+                parameters: { $expand: "mappings($expand=field)" }
             });
 
             // Reset unmapped filter
@@ -78,7 +81,14 @@ sap.ui.define([
             if (oTable && oTable.getBinding("items")) {
                 oTable.getBinding("items").filter([]);
             }
+
+            // ✅ Reset rules model on navigation
+            this.getView().getModel("rulesModel").setProperty("/rules", []);
         },
+
+        // ==========================================
+        // MAPPING STATS
+        // ==========================================
 
         _updateMappingStats: function () {
             var oTable = this.byId("mappingTable");
@@ -92,18 +102,15 @@ sap.ui.define([
                 var oContext = oItem.getBindingContext();
                 if (oContext) {
                     var sApiField = oContext.getProperty("apiField");
-                    if (sApiField && sApiField !== "") {
-                        iMappedCount++;
-                    }
+                    if (sApiField && sApiField !== "") iMappedCount++;
                 }
             });
 
             var oMetaModel = this.getView().getModel("metaModel");
             oMetaModel.setProperty("/mappingsCount", iMappedCount);
             oMetaModel.setProperty("/totalCount", iTotalCount);
-            
-            var iPercent = iTotalCount > 0 ? Math.round((iMappedCount / iTotalCount) * 100) : 0;
-            oMetaModel.setProperty("/percentValue", iPercent);
+            oMetaModel.setProperty("/percentValue",
+                iTotalCount > 0 ? Math.round((iMappedCount / iTotalCount) * 100) : 0);
         },
 
         onMappingPropertyChange: function () {
@@ -111,43 +118,45 @@ sap.ui.define([
         },
 
         // ==========================================
-        // TOOLBAR MAPPING ACTIONS
+        // TOOLBAR ACTIONS
         // ==========================================
 
         onAutoMapStandard: function () {
-            var oTable = this.byId("mappingTable");
-            if (!oTable) return;
+            var oView = this.getView();
+            var oTemplateCtx = oView.getBindingContext();
+            if (!oTemplateCtx) return;
 
-            var aItems = oTable.getItems();
-            var iMapped = 0;
+            var sTemplateId = oTemplateCtx.getProperty("ID");
 
-            var oStandardMappings = {
-                "Lockbox ID": { api: "CompanyCode", rule: "Source", ruleId: "" },
-                "Company Code": { api: "CompanyCode", rule: "Source", ruleId: "" },
-                "Deposit Date": { api: "ValueDate", rule: "Source", ruleId: "" },
-                "Payment Amount": { api: "PaidAmount", rule: "Source", ruleId: "" },
-                "Cheque Number": { api: "ChequeNumber", rule: "Source", ruleId: "" },
-                "Bank Name": { api: "BankName", rule: "Source", ruleId: "" },
-                "Invoice Amount": { api: "InvoiceAmount", rule: "Source", ruleId: "" },
-                "Difference Reason": { api: "CustomerReference", rule: "Source", ruleId: "" }
-            };
+            MessageBox.confirm(
+                "This will overwrite current mappings with the Standard Template mappings. Continue?",
+                {
+                    title: "Auto Map Standard",
+                    onClose: function (sAction) {
+                        if (sAction !== MessageBox.Action.OK) return;
 
-            aItems.forEach(function (oItem) {
-                var oContext = oItem.getBindingContext();
-                if (oContext) {
-                    var sFieldName = oContext.getProperty("field/fieldName");
-                    if (sFieldName && oStandardMappings[sFieldName]) {
-                        var oMap = oStandardMappings[sFieldName];
-                        oContext.setProperty("apiField", oMap.api);
-                        oContext.setProperty("mappingRule", oMap.rule);
-                        oContext.setProperty("ruleId", oMap.ruleId);
-                        iMapped++;
-                    }
+                        sap.ui.core.BusyIndicator.show(0);
+                        var oODataModel = oView.getModel();
+                        var oActionBinding = oODataModel.bindContext("/autoMapStandard(...)");
+                        oActionBinding.setParameter("targetTemplateId", sTemplateId);
+
+                        oActionBinding.execute().then(function () {
+                            var oTable = this.byId("mappingTable");
+                            if (oTable && oTable.getBinding("items")) {
+                                oTable.getBinding("items").refresh();
+                            }
+                            sap.ui.core.BusyIndicator.hide();
+                            this._updateMappingStats();
+                            MessageToast.show("Standard mappings applied successfully!");
+                        }.bind(this)).catch(function (oError) {
+                            sap.ui.core.BusyIndicator.hide();
+                            MessageBox.error(oError.message || "Failed to apply standard mappings.", {
+                                title: "Auto Map Failed"
+                            });
+                        });
+                    }.bind(this)
                 }
-            });
-
-            this._updateMappingStats();
-            MessageToast.show("Standard Auto-Map complete. " + iMapped + " fields mapped.");
+            );
         },
 
         onAutoMapAI: function () {
@@ -155,9 +164,8 @@ sap.ui.define([
             if (!oTable) return;
 
             var aItems = oTable.getItems();
-            
             sap.ui.core.BusyIndicator.show(0);
-            
+
             setTimeout(function () {
                 sap.ui.core.BusyIndicator.hide();
                 var iMapped = 0;
@@ -169,18 +177,12 @@ sap.ui.define([
                         if (!sApiField || sApiField === "") {
                             var sFieldName = oContext.getProperty("field/fieldName") || "";
                             var sSuggestedApi = "CustomerReference";
-                            
-                            if (sFieldName.toLowerCase().includes("invoice")) {
-                                sSuggestedApi = "InvoiceNumber";
-                            } else if (sFieldName.toLowerCase().includes("amount")) {
-                                sSuggestedApi = "InvoiceAmount";
-                            } else if (sFieldName.toLowerCase().includes("date")) {
-                                sSuggestedApi = "ValueDate";
-                            } else if (sFieldName.toLowerCase().includes("currency")) {
-                                sSuggestedApi = "Currency";
-                            } else if (sFieldName.toLowerCase().includes("reference")) {
-                                sSuggestedApi = "CustomerReference";
-                            }
+
+                            if (sFieldName.toLowerCase().includes("invoice")) sSuggestedApi = "InvoiceNumber";
+                            else if (sFieldName.toLowerCase().includes("amount")) sSuggestedApi = "InvoiceAmount";
+                            else if (sFieldName.toLowerCase().includes("date")) sSuggestedApi = "ValueDate";
+                            else if (sFieldName.toLowerCase().includes("currency")) sSuggestedApi = "Currency";
+                            else if (sFieldName.toLowerCase().includes("reference")) sSuggestedApi = "CustomerReference";
 
                             oContext.setProperty("apiField", sSuggestedApi);
                             oContext.setProperty("mappingRule", "Derived");
@@ -191,7 +193,7 @@ sap.ui.define([
                 });
 
                 this._updateMappingStats();
-                MessageToast.show("AI Auto-Map complete. " + iMapped + " fields mapped with AI rules.");
+                MessageToast.show("AI Auto-Map complete. " + iMapped + " fields mapped.");
             }.bind(this), 1500);
         },
 
@@ -203,8 +205,7 @@ sap.ui.define([
                 title: "Clear Mappings",
                 onClose: function (sAction) {
                     if (sAction === MessageBox.Action.OK) {
-                        var aItems = oTable.getItems();
-                        aItems.forEach(function (oItem) {
+                        oTable.getItems().forEach(function (oItem) {
                             var oContext = oItem.getBindingContext();
                             if (oContext) {
                                 oContext.setProperty("apiField", "");
@@ -241,7 +242,76 @@ sap.ui.define([
         },
 
         // ==========================================
-        // DYNAMIC FIELD MAPPING OPERATIONS
+        // MAPPING RULES TABLE — JSONModel based
+        // ==========================================
+
+        onAddRule: async function () {
+            try {
+                if (!this.oCreateRuleDialog) {
+                    this.oCreateRuleDialog = await Fragment.load({
+                        id: this.getView().getId(),
+                        name: "com.template.builder.fragment.CreateRuleDialog",
+                        controller: this
+                    });
+                    this.getView().addDependent(this.oCreateRuleDialog);
+                }
+
+                // Reset fields
+                Fragment.byId(this.getView().getId(), "ruleIdInput").setValue("");
+                Fragment.byId(this.getView().getId(), "ruleNameInput").setValue("");
+
+                this.oCreateRuleDialog.open();
+            } catch (error) {
+                console.error("Fragment Load Error:", error);
+                MessageToast.show("Error loading create rule dialog");
+            }
+        },
+
+        onConfirmCreateRule: function () {
+            var sRuleId   = Fragment.byId(this.getView().getId(), "ruleIdInput").getValue().trim();
+            var sRuleName = Fragment.byId(this.getView().getId(), "ruleNameInput").getValue().trim();
+
+            if (!sRuleId) { MessageToast.show("Please enter a Rule ID"); return; }
+            if (!sRuleName) { MessageToast.show("Please enter a Rule Name"); return; }
+
+            // ✅ Push to JSONModel — shows instantly in table
+            var oRulesModel = this.getView().getModel("rulesModel");
+            var aRules = oRulesModel.getProperty("/rules");
+
+            aRules.push({
+                sequence : aRules.length + 1,
+                ruleId   : sRuleId,
+                ruleName : sRuleName
+            });
+
+            oRulesModel.setProperty("/rules", aRules);
+            MessageToast.show("Rule \"" + sRuleName + "\" added.");
+            this.oCreateRuleDialog.close();
+        },
+
+        onCloseCreateRuleDialog: function () {
+            if (this.oCreateRuleDialog) {
+                this.oCreateRuleDialog.close();
+            }
+        },
+
+        onDeleteRule: function (oEvent) {
+            var oItem = oEvent.getSource().getParent().getParent();
+            var oContext = oItem.getBindingContext("rulesModel");
+            var iIndex = parseInt(oContext.getPath().split("/").pop());
+
+            var oRulesModel = this.getView().getModel("rulesModel");
+            var aRules = oRulesModel.getProperty("/rules");
+            aRules.splice(iIndex, 1);
+
+            // Re-sequence
+            aRules.forEach(function (r, i) { r.sequence = i + 1; });
+            oRulesModel.setProperty("/rules", aRules);
+            MessageToast.show("Rule removed.");
+        },
+
+        // ==========================================
+        // SOURCE FIELDS — ADD/DELETE
         // ==========================================
 
         onAddMapping: async function () {
@@ -283,12 +353,9 @@ sap.ui.define([
             if (!oTemplateCtx) return;
 
             var sTemplateId = oTemplateCtx.getProperty("ID");
-            
+
             var oTable = this.byId("mappingTable");
-            var iNextSeq = 1;
-            if (oTable) {
-                iNextSeq = oTable.getItems().length + 1;
-            }
+            var iNextSeq = oTable ? oTable.getItems().length + 1 : 1;
 
             var oODataModel = this.getView().getModel();
             var oListBinding = oODataModel.bindList("/TemplateFieldMapping");
@@ -304,11 +371,10 @@ sap.ui.define([
                 ruleId: ""
             }).created().then(function () {
                 sap.ui.core.BusyIndicator.hide();
-                MessageToast.show("Field mapped to template successfully.");
-                
+                MessageToast.show("Field added successfully.");
                 var oTable = this.byId("mappingTable");
                 if (oTable && oTable.getBinding("items")) {
-                    oTable.getBinding("items").refresh();
+                    oTable.getBinding("items");
                 }
             }.bind(this)).catch(function (error) {
                 sap.ui.core.BusyIndicator.hide();
@@ -318,11 +384,11 @@ sap.ui.define([
         },
 
         onDeleteMapping: function (oEvent) {
-            var oItem = oEvent.getSource().getParent();
+            var oItem = oEvent.getSource().getParent().getParent();
             var oContext = oItem.getBindingContext();
             if (!oContext) return;
 
-            MessageBox.confirm("Are you sure you want to remove this field mapping?", {
+            MessageBox.confirm("Remove this field mapping?", {
                 title: "Confirm Removal",
                 onClose: function (sAction) {
                     if (sAction === MessageBox.Action.OK) {
@@ -333,7 +399,6 @@ sap.ui.define([
                             this._updateMappingStats();
                         }.bind(this)).catch(function (oError) {
                             sap.ui.core.BusyIndicator.hide();
-                            console.error("Delete Mapping Error:", oError);
                             MessageToast.show("Error removing field mapping.");
                         });
                     }
@@ -354,31 +419,27 @@ sap.ui.define([
                 if (!oTable) return;
 
                 var aMappings = [];
-                var aItems = oTable.getItems();
-
-                aItems.forEach(function (oItem) {
+                oTable.getItems().forEach(function (oItem) {
                     var oContext = oItem.getBindingContext();
                     if (oContext) {
                         aMappings.push({
-                            sequenceNo: oContext.getProperty("sequenceNo"),
-                            sourceField: oContext.getProperty("field/fieldName"),
-                            level: oContext.getProperty("field/levelName"),
-                            apiField: oContext.getProperty("apiField") || null,
-                            mappingRule: oContext.getProperty("mappingRule") || null,
-                            ruleId: oContext.getProperty("ruleId") || null
+                            sequenceNo  : oContext.getProperty("sequenceNo"),
+                            sourceField : oContext.getProperty("field/fieldName"),
+                            level       : oContext.getProperty("field/levelName"),
+                            apiField    : oContext.getProperty("apiField") || null,
+                            mappingRule : oContext.getProperty("mappingRule") || null,
+                            ruleId      : oContext.getProperty("ruleId") || null
                         });
                     }
                 });
 
                 var oPayload = {
-                    templateId: oTemplateCtx.getProperty("ID"),
-                    templateName: oTemplateCtx.getProperty("templateName"),
-                    templateType: oTemplateCtx.getProperty("templateType"),
-                    sheetMode: oTemplateCtx.getProperty("sheetMode"),
-                    mappings: aMappings
+                    templateId   : oTemplateCtx.getProperty("ID"),
+                    templateName : oTemplateCtx.getProperty("templateName"),
+                    templateType : oTemplateCtx.getProperty("templateType"),
+                    sheetMode    : oTemplateCtx.getProperty("sheetMode"),
+                    mappings     : aMappings
                 };
-
-                var sJson = JSON.stringify(oPayload, null, 4);
 
                 if (!this.oPreviewDialog) {
                     this.oPreviewDialog = await Fragment.load({
@@ -390,9 +451,9 @@ sap.ui.define([
                 }
 
                 this.oPreviewDialog.open();
-                Fragment.byId(this.getView().getId(), "payloadTextArea").setValue(sJson);
+                Fragment.byId(this.getView().getId(), "payloadTextArea")
+                    .setValue(JSON.stringify(oPayload, null, 4));
             } catch (error) {
-                console.error("Payload Preview Error:", error);
                 MessageToast.show("Error loading payload preview");
             }
         },
@@ -400,67 +461,53 @@ sap.ui.define([
         onCopyPayloadToClipboard: function () {
             var oTextArea = Fragment.byId(this.getView().getId(), "payloadTextArea");
             if (oTextArea) {
-                var sText = oTextArea.getValue();
-                navigator.clipboard.writeText(sText).then(function () {
+                navigator.clipboard.writeText(oTextArea.getValue()).then(function () {
                     MessageToast.show("Payload copied to clipboard!");
-                }).catch(function (err) {
-                    console.error("Clipboard Error:", err);
+                }).catch(function () {
                     MessageToast.show("Could not copy payload.");
                 });
             }
         },
 
         onClosePreviewDialog: function () {
-            if (this.oPreviewDialog) {
-                this.oPreviewDialog.close();
-            }
+            if (this.oPreviewDialog) this.oPreviewDialog.close();
         },
 
         onValidateMapping: function () {
             var oTable = this.byId("mappingTable");
             if (!oTable) return;
 
-            var aItems = oTable.getItems();
-            var aErrors = [];
-            var aWarnings = [];
+            var aErrors = [], aWarnings = [];
 
-            aItems.forEach(function (oItem) {
+            oTable.getItems().forEach(function (oItem) {
                 var oContext = oItem.getBindingContext();
                 if (oContext) {
                     var sFieldName = oContext.getProperty("field/fieldName");
-                    var sApiField = oContext.getProperty("apiField");
-                    var sRule = oContext.getProperty("mappingRule");
-                    var bRequired = oContext.getProperty("field/isRequired");
+                    var sApiField  = oContext.getProperty("apiField");
+                    var sRule      = oContext.getProperty("mappingRule");
+                    var bRequired  = oContext.getProperty("field/isRequired");
 
                     if (!sApiField || sApiField === "") {
-                        if (bRequired) {
-                            aErrors.push("Required source field '" + sFieldName + "' is not mapped to an API Field.");
-                        } else {
-                            aWarnings.push("Optional source field '" + sFieldName + "' has no API Field mapping.");
-                        }
+                        if (bRequired) aErrors.push("Required field '" + sFieldName + "' is not mapped.");
+                        else aWarnings.push("Optional field '" + sFieldName + "' has no mapping.");
                     } else {
                         if (!sRule || sRule === "") {
-                            aErrors.push("Mapped field '" + sFieldName + "' is missing a Mapping Rule.");
+                            aErrors.push("Field '" + sFieldName + "' is missing a Mapping Rule.");
                         }
                     }
                 }
             });
 
             if (aErrors.length > 0) {
-                var sMessage = "Validation Failed:\n\n" + aErrors.join("\n") + "\n\n";
-                if (aWarnings.length > 0) {
-                    sMessage += "Warnings:\n" + aWarnings.join("\n");
-                }
-                MessageBox.error(sMessage, {
-                    title: "Mapping Validation Error"
-                });
+                var sMsg = "Validation Failed:\n\n" + aErrors.join("\n");
+                if (aWarnings.length > 0) sMsg += "\n\nWarnings:\n" + aWarnings.join("\n");
+                MessageBox.error(sMsg, { title: "Mapping Validation Error" });
             } else if (aWarnings.length > 0) {
-                var sMessage = "Validation Successful (with warnings):\n\n" + aWarnings.join("\n");
-                MessageBox.warning(sMessage, {
+                MessageBox.warning("Warnings:\n\n" + aWarnings.join("\n"), {
                     title: "Mapping Validation Warning"
                 });
             } else {
-                MessageBox.success("Validation Successful! All template fields are correctly configured and mapped to API endpoints.", {
+                MessageBox.success("All fields correctly mapped!", {
                     title: "Mapping Validation Success"
                 });
             }
@@ -468,33 +515,28 @@ sap.ui.define([
 
         onSaveChanges: function () {
             var oODataModel = this.getView().getModel();
-            
             sap.ui.core.BusyIndicator.show(0);
-            
+
             oODataModel.submitBatch(oODataModel.getUpdateGroupId()).then(function () {
                 sap.ui.core.BusyIndicator.hide();
-                MessageToast.show("All mapping changes saved persistently to the database!");
+                MessageToast.show("All changes saved!");
                 this._updateMappingStats();
-            }.bind(this)).catch(function (error) {
+            }.bind(this)).catch(function () {
                 sap.ui.core.BusyIndicator.hide();
-                console.error("Save Changes Error:", error);
                 MessageToast.show("Error saving changes.");
             });
         },
 
         // ==========================================
-        // UTILITIES & NAVIGATION
+        // NAVIGATION
         // ==========================================
 
         onNavBack: function () {
             var oHistory = History.getInstance();
-            var sPreviousHash = oHistory.getPreviousHash();
-
-            if (sPreviousHash !== undefined) {
+            if (oHistory.getPreviousHash() !== undefined) {
                 window.history.go(-1);
             } else {
-                var oRouter = this.getOwnerComponent().getRouter();
-                oRouter.navTo("RouteHome", {}, true);
+                this.getOwnerComponent().getRouter().navTo("RouteHome", {}, true);
             }
         }
     });

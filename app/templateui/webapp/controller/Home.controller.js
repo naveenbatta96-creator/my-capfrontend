@@ -17,14 +17,16 @@ sap.ui.define([
         //===================================================================================================
         // Formatter Functions
         //===================================================================================================
-        formatDate: function (sDate) {
-            if (!sDate) return "";
-            var oDate = new Date(sDate);
-            var oFormatter = sap.ui.core.format.DateFormat.getInstance({
-                pattern: "MMM dd, yyyy, hh:mm a"
-            });
-            return oFormatter.format(oDate);
-        },
+        // Replaces old formatDate
+formatCreatedDate: function (sDate, bIsStandard) {
+    if (bIsStandard) return "Built-in";
+    if (!sDate) return "";
+    var oDate = new Date(sDate);
+    var oFormatter = sap.ui.core.format.DateFormat.getInstance({
+        pattern: "MMM dd, yyyy, hh:mm a"
+    });
+    return oFormatter.format(oDate);
+},
 
         formatTemplateID: function (sUUID, sTemplateType) {
             if (!sUUID) return "";
@@ -247,6 +249,8 @@ sap.ui.define([
             var oContext = oItem.getBindingContext();
             if (!oContext) return;
 
+            if (oContext.getProperty("isStandard")) return;
+
             var sTemplateId = oContext.getProperty("ID");
             var sSheetMode = oContext.getProperty("sheetMode");
 
@@ -286,6 +290,12 @@ sap.ui.define([
             const oContext = oItem.getBindingContext();
 
             if (!oContext) return;
+
+            //gaurd for standard templates
+             if (oContext.getProperty("isStandard")) {
+        sap.m.MessageBox.error("The Standard Template cannot be deleted.");
+        return;
+    }
 
             sap.ui.core.BusyIndicator.show(0);
 
