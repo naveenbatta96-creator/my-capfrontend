@@ -55,6 +55,15 @@
                 <!-- =========================================== -->
                 <!-- SECTION 1: SOURCE FIELDS TABLE              -->
                 <!-- =========================================== -->
+                 <!-- Mapping Operations Toolbar -->
+                   <OverflowToolbar class="sapUiMediumMarginTop sapUiTinyMarginBottom">
+                    <Button text="Auto Map (Standard)" icon="sap-icon://wand" type="Accept" press=".onAutoMapStandard" class="sapUiTinyMarginEnd" />
+                    <Button text="Auto Map (AI)" icon="sap-icon://notes" press=".onAutoMapAI" class="sapUiTinyMarginEnd" />
+                    <Button text="Clear All" icon="sap-icon://delete" type="Transparent" press=".onClearAllMappings" class="sapUiTinyMarginEnd" />
+                    <ToggleButton text="Unmapped Only" icon="sap-icon://filter" pressed="{metaModel>/unmappedFilterPressed}" press=".onToggleUnmappedFilter" />
+                    <ToolbarSpacer />
+                    <Button text="Add Mapping" icon="sap-icon://add" type="Emphasized" press=".onAddMapping" />
+                </OverflowToolbar> 
                 <Panel backgroundDesign="Transparent" class="sapUiSmallMarginTop" width="100%">
                     <headerToolbar>
                         <Toolbar>
@@ -76,16 +85,23 @@
                             width="100%"
                             sticky="ColumnHeaders">
                             <columns>
-                                <Column width="25%">
+                                <Column>
                                     <Text text="Field Level" />
                                 </Column>
-                                <Column width="65%">
+                                <Column >
                                     <Text text="Source Field" />
                                 </Column>
                                             <!-- <Column width="10%">
                                                 <Text text="Action" />
                                             </Column> -->
+                                <Column >
+                                <Text  text="Target Field"/>
+                                </Column>
+                                <Column >
+                                <Text text="API Field"></Text>
+                                </Column>
                             </columns>
+
                             <items>
                                 <ColumnListItem>
                                     <cells>
@@ -96,6 +112,45 @@
 
                                         <!-- SOURCE FIELD -->
                                         <Label text="{field/fieldName}" design="Bold" />
+                                        <!-- TARGET FIELD — editable -->
+                                        <Input value="{path: 'targetField', targetType: 'any'}" placeholder="Enter target field name" width="100%" change=".onMappingPropertyChange" />
+                                         <!-- API FIELD — original Select binding -->       
+                                          <Select selectedKey="{apiField}" width="100%" change=".onMappingPropertyChange">
+                                <items>
+                                    <core:Item key="" text="— None —" />
+                                    <core:Item key="Lockbox" text="Lockbox" />
+                                    <core:Item key="CompanyCode" text="Company Code" />
+                                    <core:Item key="LockboxBatchDestination" text="Lockbox Batch Destination" />
+                                    <core:Item key="LockboxBatchOrigin" text="Lockbox Batch Origin" />
+                                    <core:Item key="DepositDateTime" text="Deposit Date Time" />
+                                    <core:Item key="IncomingPaymentFile" text="Incoming Payment File" />
+                                    <core:Item key="Currency" text="Currency" />
+                                    <core:Item key="AmountInTransactionCurrency" text="Amount In Transaction Currency" />
+                                    <core:Item key="NumberOfItems" text="Number Of Items" />
+                                    <core:Item key="ValueDate" text="Value Date" />
+                                    <core:Item key="ChequeNumber" text="Cheque Number" />
+                                    <core:Item key="BankCountry" text="Bank Country" />
+                                    <core:Item key="BankName" text="Bank Name" />
+                                    <core:Item key="BankAccountNumber" text="Bank Account Number" />
+                                    <core:Item key="CustomerNumber" text="Customer Number" />
+                                    <core:Item key="MemoLine1" text="Memo Line 1" />
+                                    <core:Item key="MemoRemarks" text="Memo / Remarks" />
+                                    <core:Item key="PaymentAdviceNumber" text="Payment Advice Number" />
+                                    <core:Item key="AssignmentReference" text="Assignment Reference" />
+                                    <core:Item key="ItemText" text="Item Text" />
+                                    <core:Item key="ReferenceDocumentID" text="Reference Document ID" />
+                                    <core:Item key="ManualTransactionType" text="Manual Transaction Type" />
+                                    <core:Item key="AdditionalInformation" text="Additional Information" />
+                                    <core:Item key="PaymentAdviceItem" text="Payment Advice Item" />
+                                    <core:Item key="CustomerAccount" text="Customer Account" />
+                                    <core:Item key="AccountType" text="Account Type" />
+                                    <core:Item key="Invoice" text="Invoice" />
+                                    <core:Item key="InvoiceAmount" text="Invoice Amount" />
+                                    <core:Item key="DeductionAmount" text="Deduction Amount" />
+                                    <core:Item key="DifferenceReason" text="Difference Reason" />
+                                    <core:Item key="InvoiceCurrency" text="Invoice Currency" />
+                                </items>
+                            </Select> 
 
                                         <!-- ACTIONS -->
                                         <!-- <Button icon="sap-icon://delete" type="Reject" press=".onDeleteMapping" /> -->

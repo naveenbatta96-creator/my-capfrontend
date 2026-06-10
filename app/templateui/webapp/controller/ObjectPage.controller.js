@@ -57,7 +57,7 @@ sap.ui.define([
                 mappingsCount: 0,
                 totalCount: 0,
                 percentValue: 0,
-                unmappedFilterPressed: false
+                unmappedFilterPressed: false  
             }), "metaModel");
 
             // ✅ Rules model — JSONModel for Mapping Rules table
