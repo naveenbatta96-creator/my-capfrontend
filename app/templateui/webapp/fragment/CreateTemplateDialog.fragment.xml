@@ -53,8 +53,8 @@
 
                                 <!-- FIELD DESCRIPTION & CUSTOM TAG -->
                                 <HBox alignItems="Center">
-                                    <Text text="{fieldName}" design="Bold" class="sapUiTinyMarginEnd" />
-                                    <ObjectStatus text="Custom" state="Indication06" visible="{path: 'ID', formatter: '.formatCustomBadge', targetType: 'any'}" />
+                                    <Text text="{fieldName}"  class="sapUiTinyMarginEnd" />
+                                    <ObjectStatus text="Custom" state="Indication06" visible="{path: 'isStandard', formatter: '.formatCustomBadge', targetType: 'any'}" />
                                 </HBox>
 
                                 <!-- PROPERTY -->

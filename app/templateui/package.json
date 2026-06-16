@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@sap/ux-ui5-tooling": "^1.0.0",
-    "@ui5/cli": "^3.0.0",
+    "@ui5/cli": "^3.11.13",
     "ui5-middleware-livereload": "^3.3.1"
   }
 }

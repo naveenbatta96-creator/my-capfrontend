@@ -20,7 +20,7 @@
                     id="templateTable"
                     class="sapUiMediumMarginTop"
                     items="{
-                        path: '/templateMasterWithCount',
+                        path: '/TemplateMaster',
                         sorter: { path: 'isStandard', descending: true }
                     }">
                     <headerToolbar>

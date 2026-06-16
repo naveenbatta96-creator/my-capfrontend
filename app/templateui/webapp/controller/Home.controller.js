@@ -7,9 +7,10 @@ sap.ui.define([
     "sap/ui/model/FilterOperator",
     "sap/ui/export/Spreadsheet",
     "sap/ui/export/library",
-    "sap/ui/core/util/File"
+    "sap/ui/core/util/File",
+    "sap/m/MessageBox"
 
-], function (Controller, Fragment, MessageToast, JSONModel, Filter, FilterOperator, Spreadsheet, exportLibrary, File) {
+], function (Controller, Fragment, MessageToast, JSONModel, Filter, FilterOperator, Spreadsheet, exportLibrary, File, MessageBox) {
     "use strict";
 
     return Controller.extend("com.template.builder.controller.Home", {
@@ -18,15 +19,15 @@ sap.ui.define([
         // Formatter Functions
         //===================================================================================================
         // Replaces old formatDate
-formatCreatedDate: function (sDate, bIsStandard) {
-    if (bIsStandard) return "Built-in";
-    if (!sDate) return "";
-    var oDate = new Date(sDate);
-    var oFormatter = sap.ui.core.format.DateFormat.getInstance({
-        pattern: "MMM dd, yyyy, hh:mm a"
-    });
-    return oFormatter.format(oDate);
-},
+        formatCreatedDate: function (sDate, bIsStandard) {
+            if (bIsStandard) return "Built-in";
+            if (!sDate) return "";
+            var oDate = new Date(sDate);
+            var oFormatter = sap.ui.core.format.DateFormat.getInstance({
+                pattern: "MMM dd, yyyy, hh:mm a"
+            });
+            return oFormatter.format(oDate);
+        },
 
         formatTemplateID: function (sUUID, sTemplateType) {
             if (!sUUID) return "";
@@ -49,17 +50,19 @@ formatCreatedDate: function (sDate, bIsStandard) {
             return sSuffix + "-" + sTemplateType + "-V1-" + sHexPart;
         },
 
-        formatCustomBadge: function (sId) {
-            if (!sId) {
-                return false;
-            }
-            var aStandardPrefixes = ["1111", "2222", "3333", "4444", "5555", "6666", "7777", "8888", "9999", "1010"];
-            var bIsStandard = aStandardPrefixes.some(function (sPrefix) {
-                return sId.startsWith(sPrefix);
-            });
-            return !bIsStandard;
+        // formatCustomBadge: function (sId) {
+        //     if (!sId) {
+        //         return false;
+        //     }
+        //     var aStandardPrefixes = ["1111", "2222", "3333", "4444", "5555", "6666", "7777", "8888", "9999", "1010"];
+        //     var bIsStandard = aStandardPrefixes.some(function (sPrefix) {
+        //         return sId.startsWith(sPrefix);
+        //     });
+        //     return bIsStandard ===false || bIsStandard === null;
+        // },
+        formatCustomBadge: function (bIsStandard) {
+            return bIsStandard === false || bIsStandard === null;
         },
-
         formatLevelState: function (sLevelName) {
             var oLevelColors = {
                 "HEADER": "Information",    // Blue
@@ -203,7 +206,7 @@ formatCreatedDate: function (sDate, bIsStandard) {
                 }.bind(this)).catch(function (oError) {
                     sap.ui.core.BusyIndicator.hide();
                     console.error("CAPM Server Save Error:", oError);
-                    MessageToast.show("Error writing records to persistent storage.");
+                    MessageBox.error("Error writing records to persistent storage.");
                 });
 
             } catch (error) {
@@ -284,31 +287,190 @@ formatCreatedDate: function (sDate, bIsStandard) {
                     MessageToast.show("Error downloading template");
                 });
         },
+        //         const oItem = oEvent.getSource().getParent();
+        //         const oContext = oItem.getBindingContext();
 
+        //         if (!oContext) return;
+
+        //         //gaurd for standard templates
+        //          if (oContext.getProperty("isStandard")) {
+        //     sap.m.MessageBox.error("The Standard Template cannot be deleted.");
+        //     return;
+        // }
+
+        //         sap.ui.core.BusyIndicator.show(0);
+
+        //         oContext.delete().then(function () {
+        //             sap.ui.core.BusyIndicator.hide();
+        //             MessageToast.show("Template deleted from SQLite database.");
+        //         }).catch(function (oError) {
+        //             sap.ui.core.BusyIndicator.hide();
+        //             console.error("Delete Fail:", oError);
+        //             MessageToast.show("Could not remove template.");
+        //         });
+        //     },
+        //   onDeleteTemplate: function (oEvent) {
+        //     var oButton = oEvent.getSource();
+        //     var oRowContext = oButton.getBindingContext();
+
+        //     if (!oRowContext) {
+        //         MessageToast.show("Could not resolve database binding item context.");
+        //         return;
+        //     }
+
+        //     // 1. Guard rail for standard templates
+        //     if (oRowContext.getProperty("isStandard")) {
+        //         sap.m.MessageBox.error("The Standard Template cannot be deleted.");
+        //         return;
+        //     }
+
+        //     // 2. Fetch the strict row ID UUID
+        //     var sTemplateId = oRowContext.getProperty("ID");
+
+        //     // 3. Prompt user for deletion confirmation
+        //     sap.m.MessageBox.confirm("Are you sure you want to permanently delete this custom template?", {
+        //         title: "Confirm Deletion",
+        //         onClose: function (sAction) {
+        //             if (sAction !== sap.m.MessageBox.Action.OK) return;
+
+        //             sap.ui.core.BusyIndicator.show(0);
+
+        //             // 4. ✅ REDIRECT PATH: Create an explicit binding context to the writable TemplateMaster set
+        //             var oODataModel = this.getView().getModel();
+        //             var oDeleteBinding = oODataModel.bindContext("/TemplateMaster(" + sTemplateId + ")");
+
+        //             // 5. Execute deletion on the base table rather than the read-only view
+        //             oDeleteBinding.getBoundContext().delete().then(function () {
+        //                 sap.ui.core.BusyIndicator.hide();
+        //                 MessageToast.show("Template deleted from SQLite database.");
+
+        //                 // 6. Refresh the main table so the count view recalculates live
+        //                 var oTable = this.byId("templateTable");
+        //                 if (oTable && oTable.getBinding("items")) {
+        //                     oTable.getBinding("items").refresh();
+        //                 }
+        //             }.bind(this)).catch(function (oError) {
+        //                 sap.ui.core.BusyIndicator.hide();
+        //                 console.error("Delete Fail:", oError);
+        //                 sap.m.MessageBox.error("Could not remove template: " + (oError.message || "Forbidden"));
+        //             });
+        //         }.bind(this)
+        //     });
+        // },
+        // onDeleteTemplate: function (oEvent) {
+        //     var oButton = oEvent.getSource();
+        //     var oRowContext = oButton.getBindingContext();
+
+        //     if (!oRowContext) {
+        //         MessageToast.show("Could not resolve binding context.");
+        //         return;
+        //     }
+
+        //     if (oRowContext.getProperty("isStandard")) {
+        //         MessageBox.error("Standard Templates cannot be deleted.");
+        //         return;
+        //     }
+
+        //     var sTemplateId = oRowContext.getProperty("ID");
+
+        //     MessageBox.confirm("Are you sure you want to permanently delete this template?", {
+        //         title: "Confirm Deletion",
+        //         onClose: function (sAction) {
+        //             if (sAction !== MessageBox.Action.OK) return;
+
+        //             sap.ui.core.BusyIndicator.show(0);
+
+        //             var oODataModel = this.getView().getModel();
+
+        //             // ✅ Step 1: Create a list binding on TemplateMaster with a key filter
+        //             var oListBinding = oODataModel.bindList("/TemplateMaster", null, null,
+        //                 new Filter("ID", FilterOperator.EQ, sTemplateId),
+        //                 { $$groupId: "$direct" }
+        //             );
+
+        //             // ✅ Step 2: Request contexts to force V4 to fetch & register the entity
+        //             oListBinding.requestContexts(0, 1).then(function (aContexts) {
+        //                 if (!aContexts || aContexts.length === 0) {
+        //                     sap.ui.core.BusyIndicator.hide();
+        //                     MessageBox.error("Template not found.");
+        //                     return Promise.reject('not found.');
+        //                 }
+
+        //                 var oTargetContext = aContexts[0];
+        //                 console.log(">>> Target context path:", oTargetContext.getPath());
+
+        //                 // ✅ Step 3: Now delete — context is live, V4 will fire DELETE to server
+        //                 return oTargetContext.delete("$direct");
+
+        //             }).then(function () {
+        //                 sap.ui.core.BusyIndicator.hide();
+        //                 MessageToast.show("Template deleted.");
+
+        //                 // Refresh the view-based list binding
+        //                 var oTable = this.byId("templateTable");
+        //                 if (oTable && oTable.getBinding("items")) {
+        //                     oTable.getBinding("items").refresh();
+        //                 }
+        //             }.bind(this)).catch(function (oError) {
+        //                 sap.ui.core.BusyIndicator.hide();
+        //                 console.error(">>> Delete FAILED:", oError.message);
+        //                 MessageBox.error("Delete failed: " + (oError.message || "Unknown error"));
+        //             });
+
+        //         }.bind(this)
+        //     });
+        // },
         onDeleteTemplate: function (oEvent) {
-            const oItem = oEvent.getSource().getParent();
-            const oContext = oItem.getBindingContext();
+            var oButton = oEvent.getSource();
+            var oRowContext = oButton.getBindingContext();
 
-            if (!oContext) return;
+            if (!oRowContext) {
+                MessageToast.show("Could not resolve binding context.");
+                return;
+            }
 
-            //gaurd for standard templates
-             if (oContext.getProperty("isStandard")) {
-        sap.m.MessageBox.error("The Standard Template cannot be deleted.");
-        return;
-    }
+            if (oRowContext.getProperty("isStandard")) {
+                MessageBox.error("Standard Templates cannot be deleted.");
+                return;
+            }
 
-            sap.ui.core.BusyIndicator.show(0);
+            var sTemplateId = oRowContext.getProperty("ID");
 
-            oContext.delete().then(function () {
-                sap.ui.core.BusyIndicator.hide();
-                MessageToast.show("Template deleted from SQLite database.");
-            }).catch(function (oError) {
-                sap.ui.core.BusyIndicator.hide();
-                console.error("Delete Fail:", oError);
-                MessageToast.show("Could not remove template.");
+            MessageBox.confirm("Are you sure you want to permanently delete this template?", {
+                title: "Confirm Deletion",
+                onClose: function (sAction) {
+                    if (sAction !== MessageBox.Action.OK) return;
+
+                    sap.ui.core.BusyIndicator.show(0);
+
+                    var oODataModel = this.getView().getModel();
+                    var oListBinding = oODataModel.bindList("/TemplateMaster", null, null,
+                        new Filter("ID", FilterOperator.EQ, sTemplateId),
+                        { $$groupId: "$direct" }
+                    );
+
+                    oListBinding.requestContexts(0, 1).then(function (aContexts) {
+                        if (!aContexts || aContexts.length === 0) {
+                            sap.ui.core.BusyIndicator.hide();
+                            MessageBox.error("Template not found.");
+                            return Promise.reject("not_found");
+                        }
+                        return aContexts[0].delete("$direct");
+                    }.bind(this)).then(function () {
+                        sap.ui.core.BusyIndicator.hide();
+                        MessageToast.show("Template deleted.");
+                        var oTable = this.byId("templateTable");
+                        if (oTable && oTable.getBinding("items")) {
+                            oTable.getBinding("items").refresh();
+                        }
+                    }.bind(this)).catch(function (oError) {
+                        if (oError === "not_found") return;
+                        sap.ui.core.BusyIndicator.hide();
+                        MessageBox.error("Delete failed: " + (oError.message || "Unknown error"));
+                    });
+                }.bind(this)
             });
         },
-
         onLevelFilterChange: function (oEvent) {
             var sKey = oEvent.getSource().getSelectedKey();
             var oTable = this.byId("fieldsTable") || Fragment.byId(this.getView().getId(), "fieldsTable");
@@ -402,6 +564,7 @@ formatCreatedDate: function (sDate, bIsStandard) {
                     sapType: "CHAR", // Default type for general catalog fields
                     fieldLength: sFieldLength,
                     propertyType: "Standard",
+                    isStandard: false,
                     isRequired: sProperty === "REQUIRED"
                 };
 

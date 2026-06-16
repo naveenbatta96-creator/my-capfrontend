@@ -74,90 +74,69 @@
                     </headerToolbar>
                     <content>
                        <ScrollContainer height="480px" vertical="true" horizontal="false" width="100%">
-                        <Table id="mappingTable"
-                            updateFinished="._updateMappingStats"
-                            items="{
-                                path: 'mappings',
-                                parameters: {
-                                    $expand: 'field'
-                                }
-                            }"
-                            width="100%"
-                            sticky="ColumnHeaders">
-                            <columns>
-                                <Column>
-                                    <Text text="Field Level" />
-                                </Column>
-                                <Column >
-                                    <Text text="Source Field" />
-                                </Column>
-                                            <!-- <Column width="10%">
-                                                <Text text="Action" />
-                                            </Column> -->
-                                <Column >
-                                <Text  text="Target Field"/>
-                                </Column>
-                                <Column >
-                                <Text text="API Field"></Text>
-                                </Column>
-                            </columns>
+                        <!-- SOURCE FIELDS TABLE -->
+<Table id="mappingTable"
+    updateFinished="._updateMappingStats"
+    items="{
+        path: 'mappings',
+        parameters: {
+            $expand: 'field'
+        }
+    }"
+    width="100%"
+    sticky="ColumnHeaders">
+    <columns>
+        <Column><Text text="Field Level" /></Column>
+        <Column><Text text="Source Field" /></Column>
+        <Column><Text text="Target Field" /></Column>
+        <Column><Text text="API Field" /></Column>
+    </columns>
+    <items>
+        <ColumnListItem>
+            <cells>
+                <!-- FIELD LEVEL -->
+                <ObjectStatus
+                    text="{path: 'field/levelName', formatter: '.formatLevelText'}"
+                    state="{path: 'field/levelName', formatter: '.formatLevelState'}" />
 
-                            <items>
-                                <ColumnListItem>
-                                    <cells>
-                                        <!-- FIELD LEVEL — badge style -->
-                                        <ObjectStatus
-                                            text="{path: 'field/levelName', formatter: '.formatLevelText'}"
-                                            state="{path: 'field/levelName', formatter: '.formatLevelState'}" />
+                <!-- SOURCE FIELD -->
+                <Text text="{field/fieldName}" />
 
-                                        <!-- SOURCE FIELD -->
-                                        <Label text="{field/fieldName}" design="Bold" />
-                                        <!-- TARGET FIELD — editable -->
-                                        <Input value="{path: 'targetField', targetType: 'any'}" placeholder="Enter target field name" width="100%" change=".onMappingPropertyChange" />
-                                         <!-- API FIELD — original Select binding -->       
-                                          <Select selectedKey="{apiField}" width="100%" change=".onMappingPropertyChange">
-                                <items>
-                                    <core:Item key="" text="— None —" />
-                                    <core:Item key="Lockbox" text="Lockbox" />
-                                    <core:Item key="CompanyCode" text="Company Code" />
-                                    <core:Item key="LockboxBatchDestination" text="Lockbox Batch Destination" />
-                                    <core:Item key="LockboxBatchOrigin" text="Lockbox Batch Origin" />
-                                    <core:Item key="DepositDateTime" text="Deposit Date Time" />
-                                    <core:Item key="IncomingPaymentFile" text="Incoming Payment File" />
-                                    <core:Item key="Currency" text="Currency" />
-                                    <core:Item key="AmountInTransactionCurrency" text="Amount In Transaction Currency" />
-                                    <core:Item key="NumberOfItems" text="Number Of Items" />
-                                    <core:Item key="ValueDate" text="Value Date" />
-                                    <core:Item key="ChequeNumber" text="Cheque Number" />
-                                    <core:Item key="BankCountry" text="Bank Country" />
-                                    <core:Item key="BankName" text="Bank Name" />
-                                    <core:Item key="BankAccountNumber" text="Bank Account Number" />
-                                    <core:Item key="CustomerNumber" text="Customer Number" />
-                                    <core:Item key="MemoLine1" text="Memo Line 1" />
-                                    <core:Item key="MemoRemarks" text="Memo / Remarks" />
-                                    <core:Item key="PaymentAdviceNumber" text="Payment Advice Number" />
-                                    <core:Item key="AssignmentReference" text="Assignment Reference" />
-                                    <core:Item key="ItemText" text="Item Text" />
-                                    <core:Item key="ReferenceDocumentID" text="Reference Document ID" />
-                                    <core:Item key="ManualTransactionType" text="Manual Transaction Type" />
-                                    <core:Item key="AdditionalInformation" text="Additional Information" />
-                                    <core:Item key="PaymentAdviceItem" text="Payment Advice Item" />
-                                    <core:Item key="CustomerAccount" text="Customer Account" />
-                                    <core:Item key="AccountType" text="Account Type" />
-                                    <core:Item key="Invoice" text="Invoice" />
-                                    <core:Item key="InvoiceAmount" text="Invoice Amount" />
-                                    <core:Item key="DeductionAmount" text="Deduction Amount" />
-                                    <core:Item key="DifferenceReason" text="Difference Reason" />
-                                    <core:Item key="InvoiceCurrency" text="Invoice Currency" />
-                                </items>
-                            </Select> 
+                <!-- TARGET FIELD — free text input -->
+                <Input value="{apiField}"
+                    placeholder="Enter target field name"
+                    width="100%"
+                    change=".onMappingPropertyChange"
+                    editable="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }" />
 
-                                        <!-- ACTIONS -->
-                                        <!-- <Button icon="sap-icon://delete" type="Reject" press=".onDeleteMapping" /> -->
-                                    </cells>
-                                </ColumnListItem>
-                            </items>
-                        </Table>
+                <!-- API FIELD — dropdown -->
+                <Select selectedKey="{apiField}"
+                    width="100%"
+                    change=".onMappingPropertyChange"
+                    enabled="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }">
+                    <items>
+                        <core:Item key="" text="— None —" />
+                        <core:Item key="Lockbox" text="Lockbox" />
+                        <core:Item key="DepositDateTime" text="Deposit Date Time" />
+                        <core:Item key="AmountInTransactionCurrency" text="Amount In Transaction Currency" />
+                        <core:Item key="Currency" text="Currency" />
+                        <core:Item key="LockboxBatchOrigin" text="Lockbox Batch Origin" />
+                        <core:Item key="LockboxBatchDestination" text="Lockbox Batch Destination" />
+                        <core:Item key="LockboxBatch" text="Lockbox Batch" />
+                        <core:Item key="LockboxBatchItem" text="Lockbox Batch Item" />
+                        <core:Item key="Cheque" text="Cheque" />
+                        <core:Item key="Customer" text="Customer" />
+                        <core:Item key="AssignmentReference" text="Assignment Reference" />
+                        <core:Item key="PaymentReference" text="Payment Reference (Invoice)" />
+                        <core:Item key="NetPaymentAmountInPaytCurrency" text="Net Payment Amount In Payt Currency" />
+                        <core:Item key="DeductionAmountInPaytCurrency" text="Deduction Amount In Payt Currency" />
+                        <core:Item key="PaymentDifferenceReason" text="Payment Difference Reason" />
+                    </items>
+                </Select>
+            </cells>
+        </ColumnListItem>
+    </items>
+</Table>
                        </ScrollContainer>
                     </content>
                 </Panel>
@@ -190,12 +169,7 @@
         <ScrollContainer height="480px" vertical="true" horizontal="false" width="100%">
             <Table id="mappingRulesTable"
                 sticky="ColumnHeaders"
-                items="{
-                    path: 'mappings',
-                    parameters: {
-                        $expand: 'field'
-                    }
-                }"
+                items="{rulesModel>/rules}"
                 width="100%"
                 noDataText="No mapping rules. Click 'Add Rule' or use Auto Map.">
                 <columns>
@@ -217,16 +191,20 @@
                     <ColumnListItem>
                         <cells>
                             <!-- SEQUENCE -->
-                            <Text text="{sequenceNo}" />
+                            <Text text="{rulesModel>sequence}" />
 
                             <!-- RULE ID — editable -->
-                            <Input value="{path: 'ruleId', targetType: 'any'}"
+                            <!-- <Input value="{path: 'ruleId', targetType: 'any'}"
                                 placeholder="e.g. RULE_FETCH_ACCT_DOC"
                                 width="100%"
-                                change=".onMappingPropertyChange" />
-
+                                change=".onMappingPropertyChange" /> -->
+                                <Input value="{rulesModel>ruleId}"
+                                    placeholder="e.g. RULE_FETCH_ACCT_DOC"
+                                    width="100%"
+                                    change=".onMappingPropertyChange"
+                                    editable="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }" />
                             <!-- RULE NAME — editable -->
-                            <Input value="{path: 'ruleName', targetType: 'any'}"
+                            <Input value="{rulesModel>ruleName}"
                                 placeholder="e.g. Fetch Account Document"
                                 width="100%"
                                 change=".onMappingPropertyChange" />
@@ -304,7 +282,12 @@
                 <ToolbarSpacer />
                 <Button text="Preview API Payload" icon="sap-icon://developer-settings" press=".onPreviewAPIPayload" />
                 <Button text="Validate Mapping" icon="sap-icon://accept" press=".onValidateMapping" />
-                <Button icon="sap-icon://save" type="Emphasized" tooltip="Save Changes" press=".onSaveChanges" />
+                <!-- <Button icon="sap-icon://save" type="Emphasized" tooltip="Save Changes" press=".onSaveChanges" /> -->
+                <Button icon="sap-icon://save" 
+        type="Emphasized" 
+        tooltip="Save Changes" 
+        press=".onSaveChanges" 
+        visible="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }" />
             </OverflowToolbar>
         </footer>
     </Page>
