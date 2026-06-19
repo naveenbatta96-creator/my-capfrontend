@@ -123,14 +123,14 @@
                 >
                     <Button
                         text="Auto Map (Standard)"
-                        icon="sap-icon://wand"
+                        icon="sap-icon://activate"
                         type="Accept"
                         press=".onAutoMapStandard"
                         class="sapUiTinyMarginEnd"
                     />
                     <Button
                         text="Auto Map (AI)"
-                        icon="sap-icon://notes"
+                        icon="sap-icon://ai"
                         press=".onAutoMapAI"
                         class="sapUiTinyMarginEnd"
                     />
@@ -143,7 +143,7 @@
                     />
                     <ToggleButton
                         text="Unmapped Only"
-                        icon="sap-icon://filter"
+                        icon="sap-icon://broken-link"
                         pressed="{metaModel>/unmappedFilterPressed}"
                         press=".onToggleUnmappedFilter"
                     />
