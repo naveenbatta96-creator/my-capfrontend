@@ -617,10 +617,6 @@ sap.ui.define([
             }), "metaModel");
 
             this.getView().setModel(new sap.ui.model.json.JSONModel({
-                rules: []
-            }), "rulesModel");
-
-            this.getView().setModel(new sap.ui.model.json.JSONModel({
                 isAdmin: false,
                 isStandardTemplate: false
             }), "authModel");
@@ -631,22 +627,39 @@ sap.ui.define([
             var sPath = "/TemplateMaster(" + sTemplateId + ")";
             var oView = this.getView();
 
+            // Reset BEFORE binding — kills stale(old) carryover regardless of whether dataReceived fires
+            oView.getModel("authModel").setProperty("/isStandardTemplate", false);
+
+            // oView.bindElement({
+            //     path: sPath,
+            //     parameters: {
+            //         $expand: "mappings($expand=field($select=ID,fieldName,levelName,isRequired);$select=ID,apiField,mappingRule,ruleId,ruleName,sequenceNo)"
+            //     },
+            //     events: {
+            //         dataReceived: function (oEvt) {
+            //             var oData = oEvt.getParameter("data");
+            //             if (oData) {
+            //                 var bIsStandard = oData.isStandard || false;
+            //                 oView.getModel("authModel").setProperty("/isStandardTemplate", bIsStandard);
+            //             }
+            //             setTimeout(this._syncRulesFromMappings.bind(this), 1500);
+            //         }.bind(this)
+            //     }
+            // });
+            oView.getModel("authModel").setProperty("/isStandardTemplate", false); // reset before bind, kills stale carryover
+
             oView.bindElement({
                 path: sPath,
                 parameters: {
-                    $expand: "mappings($expand=field($select=ID,fieldName,levelName,isRequired);$select=ID,apiField,mappingRule,ruleId,ruleName,sequenceNo)"
-                },
-                events: {
-                    dataReceived: function (oEvt) {
-                        var oData = oEvt.getParameter("data");
-                        if (oData) {
-                            var bIsStandard = oData.isStandard || false;
-                            oView.getModel("authModel").setProperty("/isStandardTemplate", bIsStandard);
-                        }
-                        setTimeout(this._syncRulesFromMappings.bind(this), 1500);
-                    }.bind(this)
+                    $select: "isStandard",
+                    $expand: "mappings($expand=field($select=ID,fieldName,levelName,isRequired);$select=ID,targetField,apiField,mappingRule,ruleId,ruleName,sequenceNo)"
                 }
             });
+
+            oView.getBindingContext().requestObject("isStandard").then(function (bIsStandard) {
+                oView.getModel("authModel").setProperty("/isStandardTemplate", !!bIsStandard);
+                this._syncRulesFromMappings();
+            }.bind(this));
 
             this.getView().getModel("metaModel").setProperty("/unmappedFilterPressed", false);
             var oTable = this.byId("mappingTable");
@@ -710,8 +723,102 @@ sap.ui.define([
         // TOOLBAR ACTIONS
         // ==========================================
 
+        // onAutoMapStandard: function () {
+        //     // Auth guard
+        //     if (!this._isEditAllowed()) {
+        //         MessageToast.show("Standard templates cannot be modified.");
+        //         return;
+        //     }
+
+        //     var oView = this.getView();
+        //     var oTemplateCtx = oView.getBindingContext();
+        //     if (!oTemplateCtx) return;
+
+        //     var sTemplateId = oTemplateCtx.getProperty("ID");
+
+        //     MessageBox.confirm(
+        //         "This will overwrite current mappings with the Standard Template mappings. Continue?",
+        //         {
+        //             title: "Auto Map Standard",
+        //             onClose: function (sAction) {
+        //                 if (sAction !== MessageBox.Action.OK) return;
+
+        //                 sap.ui.core.BusyIndicator.show(0);
+        //                 var oODataModel = oView.getModel();
+        //                 var oActionBinding = oODataModel.bindContext("/autoMapStandard(...)");
+        //                 oActionBinding.setParameter("targetTemplateId", sTemplateId);
+
+        //                 oActionBinding.execute().then(function () {
+        //                     sap.ui.core.BusyIndicator.hide();
+        //                     // FIX: refresh parent context instead of composition binding directly
+        //                     var oContext = oView.getBindingContext();
+        //                     if (oContext) oContext.refresh();
+        //                     setTimeout(this._syncRulesFromMappings.bind(this), 500);
+
+        //                     this._updateMappingStats();
+
+        //                     MessageToast.show("Standard mappings applied successfully!");
+        //                 }.bind(this)).catch(function (oError) {
+        //                     sap.ui.core.BusyIndicator.hide();
+        //                     MessageBox.error(oError.message || "Failed to apply standard mappings.", {
+        //                         title: "Auto Map Failed"
+        //                     });
+        //                 });
+        //             }.bind(this)
+        //         }
+        //     );
+        // },
+        // onAutoMapStandard: function () {
+        //     // Auth guard
+        //     if (!this._isEditAllowed()) {
+        //         MessageToast.show("Standard templates cannot be modified.");
+        //         return;
+        //     }
+
+        //     var oView = this.getView();
+        //     var oTemplateCtx = oView.getBindingContext();
+        //     if (!oTemplateCtx) return;
+
+        //     var sTemplateId = oTemplateCtx.getProperty("ID");
+
+        //     MessageBox.confirm(
+        //         "This will overwrite current mappings with the Standard Template mappings. Continue?",
+        //         {
+        //             title: "Auto Map Standard",
+        //             onClose: function (sAction) {
+        //                 if (sAction !== MessageBox.Action.OK) return;
+
+        //                 sap.ui.core.BusyIndicator.show(0);
+        //                 var oODataModel = oView.getModel();
+        //                 var oActionBinding = oODataModel.bindContext("/autoMapStandard(...)");
+        //                 oActionBinding.setParameter("targetTemplateId", sTemplateId);
+
+        //                 oActionBinding.execute().then(function () {
+        //                     var oContext = oView.getBindingContext();
+        //                     if (!oContext) {
+        //                         sap.ui.core.BusyIndicator.hide();
+        //                         return;
+        //                     }
+
+        //                     // FIX: requestRefresh() instead of refresh() + blind setTimeout —
+        //                     // resolves only once the refreshed data has actually arrived
+        //                     return oContext.requestRefresh().then(function () {
+        //                         sap.ui.core.BusyIndicator.hide();
+        //                         this._syncRulesFromMappings();
+        //                         this._updateMappingStats();
+        //                         MessageToast.show("Standard mappings applied successfully!");
+        //                     }.bind(this));
+        //                 }.bind(this)).catch(function (oError) {
+        //                     sap.ui.core.BusyIndicator.hide();
+        //                     MessageBox.error(oError.message || "Failed to apply standard mappings.", {
+        //                         title: "Auto Map Failed"
+        //                     });
+        //                 });
+        //             }.bind(this)
+        //         }
+        //     );
+        // },
         onAutoMapStandard: function () {
-            // Auth guard
             if (!this._isEditAllowed()) {
                 MessageToast.show("Standard templates cannot be modified.");
                 return;
@@ -736,15 +843,21 @@ sap.ui.define([
                         oActionBinding.setParameter("targetTemplateId", sTemplateId);
 
                         oActionBinding.execute().then(function () {
-                            sap.ui.core.BusyIndicator.hide();
-                            // FIX: refresh parent context instead of composition binding directly
                             var oContext = oView.getBindingContext();
-                            if (oContext) oContext.refresh();
-                            setTimeout(this._syncRulesFromMappings.bind(this), 500);
+                            if (!oContext) {
+                                sap.ui.core.BusyIndicator.hide();
+                                return;
+                            }
 
-                            this._updateMappingStats();
+                            // ← ADD THIS: discard any local pending changes so
+                            // requestRefresh() overwrites the UI with fresh DB values
+                            oODataModel.resetChanges();
 
-                            MessageToast.show("Standard mappings applied successfully!");
+                            return oContext.requestRefresh().then(function () {
+                                sap.ui.core.BusyIndicator.hide();
+                                this._updateMappingStats();
+                                MessageToast.show("Standard mappings applied successfully!");
+                            }.bind(this));
                         }.bind(this)).catch(function (oError) {
                             sap.ui.core.BusyIndicator.hide();
                             MessageBox.error(oError.message || "Failed to apply standard mappings.", {
@@ -801,40 +914,70 @@ sap.ui.define([
         //     }.bind(this), 1500);
         // },
 
+        // onAutoMapAI: function () {
+        //     if (!this._isEditAllowed()) {
+        //         MessageToast.show("Standard templates can not be modified.");
+        //         return;
+        //     }
+        //     var oView = this.getView();
+        //     var oTemplateCtx = oView.getBindingcontext();
+        //     if (!oTemplateCtx) return;
+
+        //     var sTemplateId = oTemplateCtx.getProperty("ID")
+        //     var oODataModel = oView.getModel();
+        //     var oActionBinding = oODataModel.bindContext("/autoMapAI(...)");
+
+        //     oActionbBinding.setParameter("templateId", sTemplateId);
+        //     sap.ui.core.BusyIndicator.show(0);
+        //     oActionBinding.execute()
+        //         .then(function () {
+        //             sap.ui.core.BusyIndicator.hide();
+
+        //             //refresh the template context to pull backend-updated mappings
+        //             oTemplateCtx.refresh();
+
+        //             //giving time to the model before syncing rules
+        //             setTimeout(this._syncRulesFromMappings.bind(this), 1500);
+        //             this._updateMappingStats();
+
+        //             MessageToast.show("AI mapping complete!");
+        //         }.bind(this))
+        //         .catch(function (oError) {
+        //             sap.ui.core.BusyIndicator.hide();
+        //             MessageBox.error(oError.message || "AI mapping failed.");
+        //         })
+
+
+        // },
         onAutoMapAI: function () {
             if (!this._isEditAllowed()) {
                 MessageToast.show("Standard templates can not be modified.");
                 return;
             }
             var oView = this.getView();
-            var oTemplateCtx = oView.getBindingcontext();
+            var oTemplateCtx = oView.getBindingContext();
             if (!oTemplateCtx) return;
 
-            var sTemplateId = oTemplateCtx.getProperty("ID")
+            var sTemplateId = oTemplateCtx.getProperty("ID");
             var oODataModel = oView.getModel();
             var oActionBinding = oODataModel.bindContext("/autoMapAI(...)");
 
-            oActionbBinding.setParameter("templateId", sTemplateId);
+            oActionBinding.setParameter("templateId", sTemplateId);
             sap.ui.core.BusyIndicator.show(0);
             oActionBinding.execute()
                 .then(function () {
                     sap.ui.core.BusyIndicator.hide();
-
-                    //refresh the template context to pull backend-updated mappings
-                    oTemplateCtx.refresh();
-
-                    //giving time to the model before syncing rules
-                    setTimeout(this._syncRulesFromMappings.bind(this), 1500);
+                    return oTemplateCtx.requestRefresh();
+                })
+                .then(function () {
+                    this._syncRulesFromMappings();
                     this._updateMappingStats();
-
                     MessageToast.show("AI mapping complete!");
                 }.bind(this))
                 .catch(function (oError) {
                     sap.ui.core.BusyIndicator.hide();
                     MessageBox.error(oError.message || "AI mapping failed.");
-                })
-
-
+                });
         },
         onClearAllMappings: function () {
             // Auth guard
@@ -853,9 +996,11 @@ sap.ui.define([
                         oTable.getItems().forEach(function (oItem) {
                             var oContext = oItem.getBindingContext();
                             if (oContext) {
+                                oContext.setProperty("targetField", "");
                                 oContext.setProperty("apiField", "");
                                 oContext.setProperty("mappingRule", "");
                                 oContext.setProperty("ruleId", "");
+                                oContext.setProperty("ruleName", "");
                             }
                         });
                         this._updateMappingStats();
@@ -1139,28 +1284,128 @@ sap.ui.define([
             if (this.oPreviewDialog) this.oPreviewDialog.close();
         },
 
+        // onValidateMapping: function () {
+        //     var oTable = this.byId("mappingTable");
+        //     if (!oTable) return;
+
+        //     var aErrors = [], aWarnings = [];
+
+        //     oTable.getItems().forEach(function (oItem) {
+        //         var oContext = oItem.getBindingContext();
+        //         if (oContext) {
+        //             var sFieldName = oContext.getProperty("field/fieldName");   // FIX: field/ not targetField/
+        //             var sApiField = oContext.getProperty("apiField");
+        //             var sRule = oContext.getProperty("mappingRule");
+        //             var bRequired = oContext.getProperty("field/isRequired");  // FIX: field/ not targetField/
+
+        //             if (!sApiField || sApiField === "") {
+        //                 if (bRequired) aErrors.push("Required field '" + sFieldName + "' is not mapped.");
+        //                 else aWarnings.push("Optional field '" + sFieldName + "' has no mapping.");
+        //             } else {
+        //                 if (!sRule || sRule === "") {
+        //                     aErrors.push("Field '" + sFieldName + "' is missing a Mapping Rule.");
+        //                 }
+        //             }
+        //         }
+        //     });
+
+        //     if (aErrors.length > 0) {
+        //         var sMsg = "Validation Failed:\n\n" + aErrors.join("\n");
+        //         if (aWarnings.length > 0) sMsg += "\n\nWarnings:\n" + aWarnings.join("\n");
+        //         MessageBox.error(sMsg, { title: "Mapping Validation Error" });
+        //     } else if (aWarnings.length > 0) {
+        //         MessageBox.warning("Warnings:\n\n" + aWarnings.join("\n"), {
+        //             title: "Mapping Validation Warning"
+        //         });
+        //     } else {
+        //         MessageBox.success("All fields correctly mapped!", {
+        //             title: "Mapping Validation Success"
+        //         });
+        //     }
+        // },
+        // onValidateMapping: function () {
+        //     var oTable = this.byId("mappingTable");
+        //     if (!oTable) return;
+
+        //     // Force any pending manual input to commit to the model
+        //     // (Input/ComboBox controls only sync on 'change', which fires on blur/Enter —
+        //     // without this, a value typed/selected just before clicking Validate is missed)
+        //     if (document.activeElement && document.activeElement.blur) {
+        //         document.activeElement.blur();
+        //     }
+
+        //     var aErrors = [], aWarnings = [];
+
+        //     oTable.getItems().forEach(function (oItem) {
+        //         var oContext = oItem.getBindingContext();
+        //         if (!oContext) return;
+
+        //         var sFieldName = oContext.getProperty("field/fieldName");
+        //         var bRequired = oContext.getProperty("field/isRequired");
+
+        //         // Read directly from the model via absolute path as a safety net,
+        //         // in case the row's context object is stale relative to the model
+        //         var sPath = oContext.getPath();
+        //         var oModel = oContext.getModel();
+        //         var sApiField = oModel.getProperty(sPath + "/apiField");
+        //         var sRule = oModel.getProperty(sPath + "/mappingRule");
+
+        //         if (!sApiField) {
+        //             if (bRequired) {
+        //                 aErrors.push("Required field '" + sFieldName + "' is not mapped.");
+        //             } else {
+        //                 aWarnings.push("Optional field '" + sFieldName + "' has no mapping.");
+        //             }
+        //         } else if (!sRule) {
+        //             aErrors.push("Field '" + sFieldName + "' is missing a Mapping Rule.");
+        //         }
+        //     });
+
+        //     if (aErrors.length > 0) {
+        //         var sMsg = "Validation Failed:\n\n" + aErrors.join("\n");
+        //         if (aWarnings.length > 0) sMsg += "\n\nWarnings:\n" + aWarnings.join("\n");
+        //         MessageBox.error(sMsg, { title: "Mapping Validation Error" });
+        //     } else if (aWarnings.length > 0) {
+        //         MessageBox.warning("Warnings:\n\n" + aWarnings.join("\n"), {
+        //             title: "Mapping Validation Warning"
+        //         });
+        //     } else {
+        //         MessageBox.success("All fields correctly mapped!", {
+        //             title: "Mapping Validation Success"
+        //         });
+        //     }
+        // },
         onValidateMapping: function () {
             var oTable = this.byId("mappingTable");
             if (!oTable) return;
+
+            // Force any pending manual input to commit to the model
+            if (document.activeElement && document.activeElement.blur) {
+                document.activeElement.blur();
+            }
 
             var aErrors = [], aWarnings = [];
 
             oTable.getItems().forEach(function (oItem) {
                 var oContext = oItem.getBindingContext();
-                if (oContext) {
-                    var sFieldName = oContext.getProperty("field/fieldName");   // FIX: field/ not targetField/
-                    var sApiField = oContext.getProperty("apiField");
-                    var sRule = oContext.getProperty("mappingRule");
-                    var bRequired = oContext.getProperty("field/isRequired");  // FIX: field/ not targetField/
+                if (!oContext) return;
 
-                    if (!sApiField || sApiField === "") {
-                        if (bRequired) aErrors.push("Required field '" + sFieldName + "' is not mapped.");
-                        else aWarnings.push("Optional field '" + sFieldName + "' has no mapping.");
+                var sFieldName = oContext.getProperty("field/fieldName");
+                var bRequired = oContext.getProperty("field/isRequired");
+
+                // OData V4: read directly from context, not oModel.getProperty()
+                // oModel.getProperty() is V2 only and throws in V4
+                var sApiField = oContext.getProperty("apiField");
+                var sRule = oContext.getProperty("mappingRule");
+
+                if (!sApiField) {
+                    if (bRequired) {
+                        aErrors.push("Required field '" + sFieldName + "' is not mapped.");
                     } else {
-                        if (!sRule || sRule === "") {
-                            aErrors.push("Field '" + sFieldName + "' is missing a Mapping Rule.");
-                        }
+                        aWarnings.push("Optional field '" + sFieldName + "' has no mapping.");
                     }
+                } else if (!sRule) {
+                    aErrors.push("Field '" + sFieldName + "' is missing a Mapping Rule.");
                 }
             });
 
@@ -1178,7 +1423,6 @@ sap.ui.define([
                 });
             }
         },
-
         onSaveChanges: function () {
             var oODataModel = this.getView().getModel();
             sap.ui.core.BusyIndicator.show(0);

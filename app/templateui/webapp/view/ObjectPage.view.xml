@@ -1,217 +1,431 @@
-<mvc:View controllerName="com.template.builder.controller.ObjectPage"
+<mvc:View
+    controllerName="com.template.builder.controller.ObjectPage"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns:f="sap.f"
-    xmlns="sap.m">
-    <Page showHeader="true" showFooter="true">
+    xmlns="sap.m"
+>
+    <Page
+        showHeader="true"
+        showFooter="true"
+    >
         <customHeader>
-            <f:ShellBar title="Lockbox Template Builder" showCopilot="false" showSearch="false" showNotifications="false" showProductSwitcher="false" homeIcon="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" />
+            <f:ShellBar
+                title="Lockbox Template Builder"
+                showCopilot="false"
+                showSearch="false"
+                showNotifications="false"
+                showProductSwitcher="false"
+                homeIcon="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg"
+            />
         </customHeader>
 
         <content>
             <VBox class="sapUiMediumMargin">
-
                 <!-- Navigation back link -->
-                <Link text="&lt; Back to Templates" press=".onNavBack" class="sapUiTinyMarginBottom" />
+                <Link
+                    text="&lt; Back to Templates"
+                    press=".onNavBack"
+                    class="sapUiTinyMarginBottom"
+                />
 
                 <!-- Template Header Info -->
-                <Title text="{templateName}" level="H2" class="sapUiTinyMarginTop sapUiTinyMarginBottom" />
-                <Text text="Map source fields to API fields. Click Auto Map (Standard) to copy rules from the standard template." class="sapUiMediumMarginBottom" />
+                <Title
+                    text="{templateName}"
+                    level="H2"
+                    class="sapUiTinyMarginTop sapUiTinyMarginBottom"
+                />
+                <Text
+                    text="Map source fields to API fields. Click Auto Map (Standard) to copy rules from the standard template."
+                    class="sapUiMediumMarginBottom"
+                />
 
                 <!-- Metadata Card -->
-                <Panel backgroundDesign="Solid" class="sapUiContentPadding sapUiSmallMarginBottom" width="100%">
+                <Panel
+                    backgroundDesign="Solid"
+                    class="sapUiContentPadding sapUiSmallMarginBottom"
+                    width="100%"
+                >
                     <content>
-                        <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                        <HBox
+                            justifyContent="SpaceBetween"
+                            alignItems="Center"
+                            width="100%"
+                        >
                             <VBox width="25%">
-                                <Label text="Template ID" class="sapUiTinyMarginBottom" />
-                                <Label text="{
+                                <Label
+                                    text="Template ID"
+                                    class="sapUiTinyMarginBottom"
+                                />
+                                <Label
+                                    text="{
                                         parts: [
                                             {path: 'ID'},
                                             {path: 'templateType'}
                                         ],
                                         formatter: '.formatTemplateID'
-                                    }" design="Bold" />
+                                    }"
+                                    design="Bold"
+                                />
                             </VBox>
                             <VBox width="25%">
-                                <Label text="Template Name" class="sapUiTinyMarginBottom" />
-                                <Label text="{templateName}" design="Bold" />
+                                <Label
+                                    text="Template Name"
+                                    class="sapUiTinyMarginBottom"
+                                />
+                                <Label
+                                    text="{templateName}"
+                                    design="Bold"
+                                />
                             </VBox>
                             <VBox width="20%">
-                                <Label text="Template Type" class="sapUiTinyMarginBottom" />
-                                <ObjectStatus text="{= ${sheetMode} === 'SINGLE' ? 'Single sheet' : 'Multiple sheets' }" state="{= ${sheetMode} === 'SINGLE' ? 'Information' : 'Success' }" />
+                                <Label
+                                    text="Template Type"
+                                    class="sapUiTinyMarginBottom"
+                                />
+                                <ObjectStatus
+                                    text="{= ${sheetMode} === 'SINGLE' ? 'Single sheet' : 'Multiple sheets' }"
+                                    state="{= ${sheetMode} === 'SINGLE' ? 'Information' : 'Success' }"
+                                />
                             </VBox>
                             <VBox width="30%">
-                                <Label text="Total Mappings" class="sapUiTinyMarginBottom" />
-                                <HBox alignItems="Center" width="100%">
-                                    <Text text="{metaModel>/mappingsCount} / {metaModel>/totalCount} mapped" class="sapUiTinyMarginEnd" />
-                                    <ProgressIndicator percentValue="{metaModel>/percentValue}" displayValue="" showValue="false" state="Success" width="140px" />
+                                <Label
+                                    text="Total Mappings"
+                                    class="sapUiTinyMarginBottom"
+                                />
+                                <HBox
+                                    alignItems="Center"
+                                    width="100%"
+                                >
+                                    <Text
+                                        text="{metaModel>/mappingsCount} / {metaModel>/totalCount} mapped"
+                                        class="sapUiTinyMarginEnd"
+                                    />
+                                    <ProgressIndicator
+                                        percentValue="{metaModel>/percentValue}"
+                                        displayValue=""
+                                        showValue="false"
+                                        state="Success"
+                                        width="140px"
+                                    />
                                 </HBox>
                             </VBox>
                         </HBox>
                     </content>
                 </Panel>
 
-                
                 <!-- =========================================== -->
                 <!-- SECTION 1: SOURCE FIELDS TABLE              -->
                 <!-- =========================================== -->
-                 <!-- Mapping Operations Toolbar -->
-                   <OverflowToolbar class="sapUiMediumMarginTop sapUiTinyMarginBottom">
-                    <Button text="Auto Map (Standard)" icon="sap-icon://wand" type="Accept" press=".onAutoMapStandard" class="sapUiTinyMarginEnd" />
-                    <Button text="Auto Map (AI)" icon="sap-icon://notes" press=".onAutoMapAI" class="sapUiTinyMarginEnd" />
-                    <Button text="Clear All" icon="sap-icon://delete" type="Transparent" press=".onClearAllMappings" class="sapUiTinyMarginEnd" />
-                    <ToggleButton text="Unmapped Only" icon="sap-icon://filter" pressed="{metaModel>/unmappedFilterPressed}" press=".onToggleUnmappedFilter" />
+                <!-- Mapping Operations Toolbar -->
+                <OverflowToolbar
+                    class="sapUiMediumMarginTop sapUiTinyMarginBottom"
+                >
+                    <Button
+                        text="Auto Map (Standard)"
+                        icon="sap-icon://wand"
+                        type="Accept"
+                        press=".onAutoMapStandard"
+                        class="sapUiTinyMarginEnd"
+                    />
+                    <Button
+                        text="Auto Map (AI)"
+                        icon="sap-icon://notes"
+                        press=".onAutoMapAI"
+                        class="sapUiTinyMarginEnd"
+                    />
+                    <Button
+                        text="Clear All"
+                        icon="sap-icon://delete"
+                        type="Transparent"
+                        press=".onClearAllMappings"
+                        class="sapUiTinyMarginEnd"
+                    />
+                    <ToggleButton
+                        text="Unmapped Only"
+                        icon="sap-icon://filter"
+                        pressed="{metaModel>/unmappedFilterPressed}"
+                        press=".onToggleUnmappedFilter"
+                    />
                     <ToolbarSpacer />
-                    <Button text="Add Mapping" icon="sap-icon://add" type="Emphasized" press=".onAddMapping" />
-                </OverflowToolbar> 
-                <Panel backgroundDesign="Transparent" class="sapUiSmallMarginTop" width="100%">
+                    <Button
+                        text="Add Mapping"
+                        icon="sap-icon://add"
+                        type="Emphasized"
+                        press=".onAddMapping"
+                    />
+                </OverflowToolbar>
+                <Panel
+                    backgroundDesign="Transparent"
+                    class="sapUiSmallMarginTop"
+                    width="100%"
+                >
                     <headerToolbar>
                         <Toolbar>
-                            <core:Icon src="sap-icon://table-view" class="sapUiTinyMarginEnd" />
-                            <Title text="Source Fields" level="H3" />
-                            <Text text="({metaModel>/totalCount} fields)" class="sapUiTinyMarginBegin sapThemeTextDefault" />
+                            <core:Icon
+                                src="sap-icon://table-view"
+                                class="sapUiTinyMarginEnd"
+                            />
+                            <Title
+                                text="Source Fields"
+                                level="H3"
+                            />
+                            <Text
+                                text="({metaModel>/totalCount} fields)"
+                                class="sapUiTinyMarginBegin sapThemeTextDefault"
+                            />
                         </Toolbar>
                     </headerToolbar>
                     <content>
-                       <ScrollContainer height="480px" vertical="true" horizontal="false" width="100%">
-                        <!-- SOURCE FIELDS TABLE -->
-<Table id="mappingTable"
-    updateFinished="._updateMappingStats"
-    items="{
-        path: 'mappings',
-        parameters: {
-            $expand: 'field'
-        }
-    }"
-    width="100%"
-    sticky="ColumnHeaders">
-    <columns>
-        <Column><Text text="Field Level" /></Column>
-        <Column><Text text="Source Field" /></Column>
-        <Column><Text text="Target Field" /></Column>
-        <Column><Text text="API Field" /></Column>
-    </columns>
-    <items>
-        <ColumnListItem>
-            <cells>
-                <!-- FIELD LEVEL -->
-                <ObjectStatus
-                    text="{path: 'field/levelName', formatter: '.formatLevelText'}"
-                    state="{path: 'field/levelName', formatter: '.formatLevelState'}" />
+                        <ScrollContainer
+                            height="480px"
+                            vertical="true"
+                            horizontal="false"
+                            width="100%"
+                        >
+                            <!-- SOURCE FIELDS TABLE -->
+                            <Table
+                                id="mappingTable"
+                                updateFinished="._updateMappingStats"
+                                items="{
+                                        path: 'mappings',
+                                        parameters: {
+                                                    $expand: 'field'
+                                                    }
+                                        }"
+                                width="100%"
+                                sticky="ColumnHeaders"
+                            >
+                                <columns>
+                                    <Column>
+                                        <Text text="Field Level" />
+                                    </Column>
+                                    <Column>
+                                        <Text text="Source Field" />
+                                    </Column>
+                                    <Column>
+                                        <Text text="Target Field" />
+                                    </Column>
+                                    <Column>
+                                        <Text text="API Field" />
+                                    </Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <!-- FIELD LEVEL -->
+                                            <ObjectStatus
+                                                text="{path: 'field/levelName', formatter: '.formatLevelText'}"
+                                                state="{path: 'field/levelName', formatter: '.formatLevelState'}"
+                                            />
 
-                <!-- SOURCE FIELD -->
-                <Text text="{field/fieldName}" />
+                                            <!-- SOURCE FIELD -->
+                                            <Text text="{field/fieldName}" />
 
-                <!-- TARGET FIELD — free text input -->
-                <Input value="{apiField}"
-                    placeholder="Enter target field name"
-                    width="100%"
-                    change=".onMappingPropertyChange"
-                    editable="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }" />
+                                            <!-- TARGET FIELD — free text input -->
+                                            <Input
+                                                value="{targetField}"
+                                                placeholder="Enter target field name"
+                                                width="100%"
+                                                change=".onMappingPropertyChange"
+                                                editable="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }"
+                                            />
 
-                <!-- API FIELD — dropdown -->
-                <Select selectedKey="{apiField}"
-                    width="100%"
-                    change=".onMappingPropertyChange"
-                    enabled="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }">
-                    <items>
-                        <core:Item key="" text="— None —" />
-                        <core:Item key="Lockbox" text="Lockbox" />
-                        <core:Item key="DepositDateTime" text="Deposit Date Time" />
-                        <core:Item key="AmountInTransactionCurrency" text="Amount In Transaction Currency" />
-                        <core:Item key="Currency" text="Currency" />
-                        <core:Item key="LockboxBatchOrigin" text="Lockbox Batch Origin" />
-                        <core:Item key="LockboxBatchDestination" text="Lockbox Batch Destination" />
-                        <core:Item key="LockboxBatch" text="Lockbox Batch" />
-                        <core:Item key="LockboxBatchItem" text="Lockbox Batch Item" />
-                        <core:Item key="Cheque" text="Cheque" />
-                        <core:Item key="Customer" text="Customer" />
-                        <core:Item key="AssignmentReference" text="Assignment Reference" />
-                        <core:Item key="PaymentReference" text="Payment Reference (Invoice)" />
-                        <core:Item key="NetPaymentAmountInPaytCurrency" text="Net Payment Amount In Payt Currency" />
-                        <core:Item key="DeductionAmountInPaytCurrency" text="Deduction Amount In Payt Currency" />
-                        <core:Item key="PaymentDifferenceReason" text="Payment Difference Reason" />
-                    </items>
-                </Select>
-            </cells>
-        </ColumnListItem>
-    </items>
-</Table>
-                       </ScrollContainer>
+                                            <!-- API FIELD — dropdown -->
+                                            <Select
+                                                selectedKey="{apiField}"
+                                                width="100%"
+                                                change=".onMappingPropertyChange"
+                                                enabled="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }"
+                                            >
+                                                <items>
+                                                    <core:Item
+                                                        key=""
+                                                        text="— None —"
+                                                    />
+                                                    <core:Item
+                                                        key="Lockbox"
+                                                        text="Lockbox"
+                                                    />
+                                                    <core:Item
+                                                        key="DepositDateTime"
+                                                        text="Deposit Date Time"
+                                                    />
+                                                    <core:Item
+                                                        key="AmountInTransactionCurrency"
+                                                        text="Amount In Transaction Currency"
+                                                    />
+                                                    <core:Item
+                                                        key="Currency"
+                                                        text="Currency"
+                                                    />
+                                                    <core:Item
+                                                        key="LockboxBatchOrigin"
+                                                        text="Lockbox Batch Origin"
+                                                    />
+                                                    <core:Item
+                                                        key="LockboxBatchDestination"
+                                                        text="Lockbox Batch Destination"
+                                                    />
+                                                    <core:Item
+                                                        key="LockboxBatch"
+                                                        text="Lockbox Batch"
+                                                    />
+                                                    <core:Item
+                                                        key="LockboxBatchItem"
+                                                        text="Lockbox Batch Item"
+                                                    />
+                                                    <core:Item
+                                                        key="Cheque"
+                                                        text="Cheque"
+                                                    />
+                                                    <core:Item
+                                                        key="Customer"
+                                                        text="Customer"
+                                                    />
+                                                    <core:Item
+                                                        key="AssignmentReference"
+                                                        text="Assignment Reference"
+                                                    />
+                                                    <core:Item
+                                                        key="PaymentReference"
+                                                        text="Payment Reference (Invoice)"
+                                                    />
+                                                    <core:Item
+                                                        key="NetPaymentAmountInPaytCurrency"
+                                                        text="Net Payment Amount In Payt Currency"
+                                                    />
+                                                    <core:Item
+                                                        key="DeductionAmountInPaytCurrency"
+                                                        text="Deduction Amount In Payt Currency"
+                                                    />
+                                                    <core:Item
+                                                        key="PaymentDifferenceReason"
+                                                        text="Payment Difference Reason"
+                                                    />
+                                                </items>
+                                            </Select>
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </ScrollContainer>
                     </content>
                 </Panel>
 
-               <!-- =========================================== -->
-               <!-- SECTION 2: MAPPING RULES TABLE              -->
+                <!-- =========================================== -->
+                <!-- SECTION 2: MAPPING RULES TABLE              -->
                 <!-- =========================================== -->
                 <!-- Mapping Operations Toolbar -->
-                   <!-- <OverflowToolbar class="sapUiMediumMarginTop sapUiTinyMarginBottom">
-                    <Button text="Auto Map (Standard)" icon="sap-icon://wand" type="Accept" press=".onAutoMapStandard" class="sapUiTinyMarginEnd" />
-                    <Button text="Auto Map (AI)" icon="sap-icon://notes" press=".onAutoMapAI" class="sapUiTinyMarginEnd" />
-                    <Button text="Clear All" icon="sap-icon://delete" type="Transparent" press=".onClearAllMappings" class="sapUiTinyMarginEnd" />
-                    <ToggleButton text="Unmapped Only" icon="sap-icon://filter" pressed="{metaModel>/unmappedFilterPressed}" press=".onToggleUnmappedFilter" />
+                <!-- <OverflowToolbar class="sapUiMediumMarginTop sapUiTinyMarginBottom">
+                    <Button text="Auto Map (Standard)" icon="sap-icon://wand" type="Accept" press=".onAutoMapStandard"
+                class="sapUiTinyMarginEnd" />
+                    <Button text="Auto Map (AI)" icon="sap-icon://notes" press=".onAutoMapAI"
+                class="sapUiTinyMarginEnd" />
+                    <Button text="Clear All" icon="sap-icon://delete" type="Transparent" press=".onClearAllMappings"
+                class="sapUiTinyMarginEnd" />
+                    <ToggleButton text="Unmapped Only" icon="sap-icon://filter"
+                pressed="{metaModel>/unmappedFilterPressed}" press=".onToggleUnmappedFilter" />
                     <ToolbarSpacer />
                     <Button text="Add Mapping" icon="sap-icon://add" type="Emphasized" press=".onAddMapping" />
                 </OverflowToolbar> -->
 
-                 <!--  ===================================================  -->
-<Panel backgroundDesign="Transparent" class="sapUiMediumMarginTop" width="100%">
-    <headerToolbar>
-        <Toolbar>
-            <core:Icon src="sap-icon://list" class="sapUiTinyMarginEnd" />
-            <Title text="Mapping Rules" level="H3" />
-            <Text text="({metaModel>/totalCount} rules)" class="sapUiTinyMarginBegin" />
-            <ToolbarSpacer />
-            <Button text="Add Rule" icon="sap-icon://add" type="Transparent" press=".onAddRule" />
-        </Toolbar>
-    </headerToolbar>
-    <content>
-        <ScrollContainer height="480px" vertical="true" horizontal="false" width="100%">
-            <Table id="mappingRulesTable"
+                <!--  ===================================================  -->
+                <Panel
+                    backgroundDesign="Transparent"
+                    class="sapUiMediumMarginTop"
+                    width="100%"
+                >
+                    <headerToolbar>
+                        <Toolbar>
+                            <core:Icon
+                                src="sap-icon://list"
+                                class="sapUiTinyMarginEnd"
+                            />
+                            <Title
+                                text="Mapping Rules"
+                                level="H3"
+                            />
+                            <Text
+                                text="({metaModel>/mappingsCount} rules)"
+                                class="sapUiTinyMarginBegin"
+                            />
+                            <ToolbarSpacer />
+                            <Button
+                                text="Add Rule"
+                                icon="sap-icon://add"
+                                type="Transparent"
+                                press=".onAddRule"
+                            />
+                        </Toolbar>
+                    </headerToolbar>
+                    <content>
+                        <ScrollContainer
+                            height="480px"
+                            vertical="true"
+                            horizontal="false"
+                            width="100%"
+                        >
+                            <!-- <Table id="mappingRulesTable"
                 sticky="ColumnHeaders"
                 items="{rulesModel>/rules}"
                 width="100%"
-                noDataText="No mapping rules. Click 'Add Rule' or use Auto Map.">
-                <columns>
-                    <Column width="10%">
-                        <Text text="Sequence" />
-                    </Column>
-                    <Column width="25%">
-                        <Text text="Rule ID" />
-                    </Column>
-                    <Column width="30%">
-                        <Text text="Rule Name" />
-                    </Column>
-                   
-                    <Column width="5%" hAlign="Center">
-                        <Text text="Action" />
-                    </Column>
-                </columns>
-                <items>
-                    <ColumnListItem>
-                        <cells>
-                            <!-- SEQUENCE -->
-                            <Text text="{rulesModel>sequence}" />
-
-                            <!-- RULE ID — editable -->
-                            <!-- <Input value="{path: 'ruleId', targetType: 'any'}"
-                                placeholder="e.g. RULE_FETCH_ACCT_DOC"
+                noDataText="No mapping rules. Click 'Add Rule' or use Auto Map."> -->
+                            <Table
+                                id="mappingRulesTable"
+                                sticky="ColumnHeaders"
+                                items="{path: 'mappings', parameters: { $expand: 'field' }}"
                                 width="100%"
-                                change=".onMappingPropertyChange" /> -->
-                                <Input value="{rulesModel>ruleId}"
-                                    placeholder="e.g. RULE_FETCH_ACCT_DOC"
-                                    width="100%"
-                                    change=".onMappingPropertyChange"
-                                    editable="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }" />
-                            <!-- RULE NAME — editable -->
-                            <Input value="{rulesModel>ruleName}"
-                                placeholder="e.g. Fetch Account Document"
-                                width="100%"
-                                change=".onMappingPropertyChange" />
+                                noDataText="No mapping rules. Click 'Add Rule' or use Auto Map.">
+                                <columns>
+                                    <Column width="10%">
+                                        <Text text="Sequence" />
+                                    </Column>
+                                    <Column width="25%">
+                                        <Text text="Rule ID" />
+                                    </Column>
+                                    <Column width="30%">
+                                        <Text text="Rule Name" />
+                                    </Column>
 
-                            <!-- API FIELD — original Select binding
-                            <Select selectedKey="{apiField}" width="100%" change=".onMappingPropertyChange">
+                                    <Column
+                                        width="5%"
+                                        hAlign="Center"
+                                    >
+                                        <Text text="Action" />
+                                    </Column>
+                                </columns>
                                 <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <!-- SEQUENCE -->
+                                            <Text
+                                                text="{sequenceNo}"
+                                            />
+
+                                            <!-- RULE ID — editable -->
+                                            <!-- <Input value="{path: 'ruleId', targetType: 'any'}"
+                                                placeholder="e.g. RULE_FETCH_ACCT_DOC"
+                                                width="100%"
+                                                change=".onMappingPropertyChange" /> -->
+                                            <Input
+                                                value="{ruleId}"
+                                                placeholder="e.g. RULE_FETCH_ACCT_DOC"
+                                                width="100%"
+                                                change=".onMappingPropertyChange"
+                                                editable="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }"
+                                            />
+                                            <!-- RULE NAME — editable -->
+                                            <Input
+                                                value="{ruleName}"
+                                                placeholder="e.g. Fetch Account Document"
+                                                width="100%"
+                                                change=".onMappingPropertyChange"
+                                            />
+
+                                            <!-- API FIELD — original Select binding
+                                    <Select selectedKey="{apiField}" width="100%" change=".onMappingPropertyChange">
+                                    <items>
                                     <core:Item key="" text="— None —" />
                                     <core:Item key="Lockbox" text="Lockbox" />
                                     <core:Item key="CompanyCode" text="Company Code" />
@@ -244,12 +458,12 @@
                                     <core:Item key="DeductionAmount" text="Deduction Amount" />
                                     <core:Item key="DifferenceReason" text="Difference Reason" />
                                     <core:Item key="InvoiceCurrency" text="Invoice Currency" />
-                                </items>
-                            </Select> -->
+                                    </items>
+                                    </Select> -->
 
-                            <!-- MAPPING RULE — original Select binding -->
-                            <!-- <Select selectedKey="{mappingRule}" width="100%">
-                                <items>
+                                            <!-- MAPPING RULE — original Select binding -->
+                                            <!-- <Select selectedKey="{mappingRule}" width="100%">
+                                    <items>
                                     <core:Item key="" text="— None —" />
                                     <core:Item key="Source" text="Source" />
                                     <core:Item key="Rule base" text="Rule base" />
@@ -257,37 +471,68 @@
                                     <core:Item key="Formulae" text="Formulae" />
                                     <core:Item key="Derived" text="Derived" />
                                     <core:Item key="Default" text="Default" />
+                                    </items>
+                                    </Select> -->
+
+                                            <!-- ACTIONS -->
+                                            <!-- <HBox
+                                                justifyContent="Center"
+                                                width="100%"
+                                            >
+                                                <Button
+                                                    icon="sap-icon://delete"
+                                                    type="Reject"
+                                                    press=".onDeleteMapping"
+                                                />
+                                            </HBox> -->
+                                            <!-- ACTIONS -->
+                                            <HBox
+                                                justifyContent="Center"
+                                                alignItems="Center"
+                                                width="48px"
+                                                shrinkable="false">
+                                                <Button
+                                                    icon="sap-icon://delete"
+                                                    type="Reject"
+                                                    press=".onDeleteMapping" />
+                                            </HBox>
+                                        </cells>
+                                    </ColumnListItem>
                                 </items>
-                            </Select> -->
-
-                            <!-- ACTIONS -->
-                            <HBox justifyContent="Center" width="100%">
-                                <Button icon="sap-icon://delete" type="Reject" press=".onDeleteMapping" />
-                            </HBox>
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
-        </ScrollContainer>
-    </content>
-</Panel>
-                
-
+                            </Table>
+                        </ScrollContainer>
+                    </content>
+                </Panel>
             </VBox>
         </content>
 
         <footer>
             <OverflowToolbar>
-                <Button text="Back" icon="sap-icon://back" press=".onNavBack" />
+                <Button
+                    text="Back"
+                    icon="sap-icon://back"
+                    press=".onNavBack"
+                />
                 <ToolbarSpacer />
-                <Button text="Preview API Payload" icon="sap-icon://developer-settings" press=".onPreviewAPIPayload" />
-                <Button text="Validate Mapping" icon="sap-icon://accept" press=".onValidateMapping" />
-                <!-- <Button icon="sap-icon://save" type="Emphasized" tooltip="Save Changes" press=".onSaveChanges" /> -->
-                <Button icon="sap-icon://save" 
-        type="Emphasized" 
-        tooltip="Save Changes" 
-        press=".onSaveChanges" 
-        visible="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }" />
+                <Button
+                    text="Preview API Payload"
+                    icon="sap-icon://developer-settings"
+                    press=".onPreviewAPIPayload"
+                />
+                <Button
+                    text="Validate Mapping"
+                    icon="sap-icon://accept"
+                    press=".onValidateMapping"
+                />
+                <!-- <Button icon="sap-icon://save" type="Emphasized" tooltip="Save Changes"
+                press=".onSaveChanges" /> -->
+                <Button
+                    icon="sap-icon://save"
+                    type="Emphasized"
+                    tooltip="Save Changes"
+                    press=".onSaveChanges"
+                    visible="{= !${authModel>/isStandardTemplate} || ${authModel>/isAdmin} }"
+                />
             </OverflowToolbar>
         </footer>
     </Page>
