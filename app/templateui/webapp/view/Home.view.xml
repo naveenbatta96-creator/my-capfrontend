@@ -34,13 +34,27 @@
                         </OverflowToolbar>
                     </headerToolbar>
                     <columns>
-                        <Column><Text text="Template Id" /></Column>
-                        <Column><Text text="Template Name" /></Column>
-                        <Column><Text text="Template Type" /></Column>
-                        <Column><Text text="Sheet Mode" /></Column>
-                        <Column><Text text="Total Fields" /></Column>
-                        <Column><Text text="Created" /></Column>
-                        <Column><Text text="Actions" /></Column>
+                        <Column>
+                            <Text text="Template Id" />
+                        </Column>
+                        <Column>
+                            <Text text="Template Name" />
+                        </Column>
+                        <Column>
+                            <Text text="Template Type" />
+                        </Column>
+                        <Column>
+                            <Text text="Sheet Mode" />
+                        </Column>
+                        <Column>
+                            <Text text="Total Fields" />
+                        </Column>
+                        <Column>
+                            <Text text="Created" />
+                        </Column>
+                        <Column>
+                            <Text text="Actions" />
+                        </Column>
                     </columns>
 
                     <items>
@@ -50,7 +64,8 @@
                             highlight="{= ${isStandard} ? 'Warning' : 'None'}">
                             <cells>
                                 <!-- TEMPLATE ID -->
-                                <Text text="{
+                                <Text
+                                    text="{
                                     parts: [{path: 'ID'}, {path: 'templateType'}],
                                     formatter: '.formatTemplateID'
                                 }" />
@@ -78,10 +93,11 @@
                                 <Text text="{mappingsCount}" />
 
                                 <!-- CREATED — "Built-in" for standard -->
-                              <Text text="{
+                                <Text
+                                    text="{
     parts: [
         {path: 'createdAt'},
-        {path: 'isStandard'}
+        {path: 'isStandard', targetType :'any'}
     ],
     formatter: '.formatCreatedDate'
 }" />
