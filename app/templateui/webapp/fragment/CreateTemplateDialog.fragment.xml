@@ -1,25 +1,29 @@
 <core:FragmentDefinition xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <Dialog id="createTemplateDialog" title="Create Template" contentWidth="1000px" draggable="true" resizable="true">
+    <Dialog id="createTemplateDialog" title="Create Template" contentWidth="1000px" draggable="true"
+        resizable="true">
         <content>
             <VBox class="sapUiMediumMargin">
                 <!-- Field Catalog Table -->
-                <Table id="fieldsTable" mode="MultiSelect" growing="true" growingScrollToLoad="true" class="sapUiMediumMarginTop" items="{path: '/FieldMaster'}">
+                <Table id="fieldsTable" mode="MultiSelect" growing="true" growingScrollToLoad="true"
+                    class="sapUiMediumMarginTop" items="{path: '/FieldMaster'}">
                     <headerToolbar>
                         <Toolbar>
                             <Title text="Choose Fields" />
 
                             <ToolbarSpacer />
 
-                            <Button icon="sap-icon://add" text="Add Field" type="Transparent" press=".onAddNewField" class="sapUiTinyMarginEnd" />
+                            <Button icon="sap-icon://add" text="Add Field" type="Transparent"
+                                press=".onAddNewField" class="sapUiTinyMarginEnd" />
 
-                            <Select id="levelFilterSelect" width="180px" change=".onLevelFilterChange">
+                            <Select id="levelFilterSelect" width="180px"
+                                change=".onLevelFilterChange">
                                 <items>
                                     <core:Item key="ALL" text="All Levels" />
 
-                                    <core:Item key="HEADER" text="Header" />
+                                    <core:Item key="Batch" text="Batch" />
 
-                                    <core:Item key="PAYMENT" text="Payment" />
+                                    <core:Item key="BatchItem" text="BatchItem" />
 
                                     <core:Item key="CLEARING" text="Clearing" />
                                 </items>
@@ -49,16 +53,20 @@
                         <ColumnListItem>
                             <cells>
                                 <!-- LEVEL -->
-                                <ObjectStatus text="{path: 'levelName', formatter: '.formatLevelText'}" state="{path: 'levelName', formatter: '.formatLevelState', targetType: 'any'}" />
+                                <ObjectStatus
+                                    text="{path: 'levelName', formatter: '.formatLevelText'}"
+                                    state="{path: 'levelName', formatter: '.formatLevelState', targetType: 'any'}" />
 
                                 <!-- FIELD DESCRIPTION & CUSTOM TAG -->
                                 <HBox alignItems="Center">
-                                    <Text text="{fieldName}"  class="sapUiTinyMarginEnd" />
-                                    <ObjectStatus text="Custom" state="Indication06" visible="{path: 'isStandard', formatter: '.formatCustomBadge', targetType: 'any'}" />
+                                    <Text text="{fieldName}" class="sapUiTinyMarginEnd" />
+                                    <ObjectStatus text="Custom" state="Indication06"
+                                        visible="{path: 'isStandard', formatter: '.formatCustomBadge', targetType: 'any'}" />
                                 </HBox>
 
                                 <!-- PROPERTY -->
-                                <ObjectStatus text="{= ${isRequired} ? 'Required' : 'Optional' }" state="{= ${isRequired} ? 'Error' : 'None' }" />
+                                <ObjectStatus text="{= ${isRequired} ? 'Required' : 'Optional' }"
+                                    state="{= ${isRequired} ? 'Error' : 'None' }" />
 
                                 <!-- MAX LENGTH -->
                                 <Text text="{fieldLength}" />
@@ -94,7 +102,7 @@
                             <items>
                                 <core:Item key="SINGLE" text="Single Sheet" />
                                 <core:Item key="MULTIPLE" text="Multiple Sheets" />
-                              </items>
+                            </items>
                         </Select>
                     </VBox>
                 </HBox>

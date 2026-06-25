@@ -1,63 +1,38 @@
-<core:FragmentDefinition
-    xmlns="sap.m"
-    xmlns:core="sap.ui.core"
-    xmlns:f="sap.ui.layout.form"
->
-    <Dialog
-        id="createRuleDialog"
-        title="Create New Mapping Rule"
-        type="Standard"
-        contentWidth="500px"
-    >
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog id="createRuleDialog" title="Add Mapping Rule" contentWidth="500px" draggable="true">
         <content>
-            <f:SimpleForm
-                editable="true"
-                layout="ResponsiveGridLayout"
-                class="sapUiMediumMargin"
-            >
-                <f:content>
+            <VBox class="sapUiMediumMargin" width="80%">
+                <VBox class="sapUiSmallMarginBottom">
                     <Label text="Rule ID" required="true" />
                     <Input
                         id="ruleIdInput"
-                        placeholder="e.g. RULE_FETCH_ACCT_DOC"
+                        placeholder="e.g. RULE_GET_CUSTOMER"
                         width="80%"
-                        maxLength="50"
+                        class="sapUiTinyMarginTop"
                     />
+                    <Text text="Unique identifier for this rule"
+                        class="sapThemeTextDefault sapUiTinyMarginTop" />
+                </VBox>
 
+                <VBox class="sapUiSmallMarginBottom">
                     <Label text="Rule Name" required="true" />
                     <Input
                         id="ruleNameInput"
-                        placeholder="e.g. Fetch Account Document"
+                        placeholder="e.g. Derive Customer"
                         width="80%"
-                        maxLength="100"
+                        class="sapUiTinyMarginTop"
                     />
-
-                    <Label text="Description" />
-                    <TextArea
-                        id="ruleDescInput"
-                        placeholder="Optional description of the rule"
-                        width="80%"
-                        rows="3"
-                        maxLength="500"
-                    />
-                </f:content>
-            </f:SimpleForm>
+                    <Text text="Human-readable description of this rule"
+                        class="sapThemeTextDefault sapUiTinyMarginTop" />
+                </VBox>
+            </VBox>
         </content>
 
         <beginButton>
-            <Button
-                text="Cancel"
-                type="Transparent"
-                press=".onCloseCreateRuleDialog"
-            />
+            <Button text="Add" type="Emphasized" press=".onConfirmCreateRule" />
         </beginButton>
-
         <endButton>
-            <Button
-                text="Create Rule"
-                type="Emphasized"
-                press=".onConfirmCreateRule"
-            />
+            <Button text="Cancel" press=".onCloseCreateRuleDialog" />
         </endButton>
     </Dialog>
 </core:FragmentDefinition>

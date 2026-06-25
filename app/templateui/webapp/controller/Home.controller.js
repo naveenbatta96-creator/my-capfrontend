@@ -65,8 +65,8 @@ sap.ui.define([
         },
         formatLevelState: function (sLevelName) {
             var oLevelColors = {
-                "HEADER": "Information",    // Blue
-                "PAYMENT": "Success",       // Green
+                "Batch": "Information",    // Blue
+                "BatchItem": "Success",       // Green
                 "CLEARING": "Warning"       // Orange
             };
             return oLevelColors[sLevelName] || "None";
